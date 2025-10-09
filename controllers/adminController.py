@@ -9,6 +9,7 @@ from models.admin import Admin
 import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
+from models.product import Product
 
 load_dotenv()
 
@@ -56,7 +57,6 @@ class UserLogin:
 
         return {"access_token": token, "token_type": "bearer"}
 
-
     @staticmethod
     def profile(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
         try:
@@ -82,3 +82,7 @@ class UserLogin:
             if token in blacklisted_tokens:
                 raise HTTPException(status_code=401, detail="Token revoked")
         return await call_next(request)
+    
+    @staticmethod
+    def all_product(db: Session):
+        return db.query(Product).all()

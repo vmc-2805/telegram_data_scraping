@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'includes/header.html' %}
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'includes/sidebar.html' %}
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                {% include 'includes/navbar.html' %}
+
+
+                {% block content %}
+                <div class="container-fluid" id="container-wrapper">
+                    Similer Products
+                </div>
+                {% endblock %}
+            </div>
+            {% include 'includes/footer.html' %}
+
+        </div>
+    </div>
+
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    {% include 'includes/scripts.html' %}
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable();
+            $('#dataTableHover').DataTable();
+        });
+    </script>
+</body>
+
+</html>

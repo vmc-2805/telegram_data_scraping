@@ -1,0 +1,27 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="{{ url_for('static', path='img/logo/logo.png') }}" rel="icon">
+    <title>{{ title if title else 'Dashboard' }}</title>
+
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', path='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
+        type="text/css">
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', path='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"
+        type="text/css">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', path='css/ruang-admin.min.css') }}" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', path='js/logout.js') }}"></script>
+</head>
