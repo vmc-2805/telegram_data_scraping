@@ -22,6 +22,7 @@ API_HASH = os.getenv("TELEGRAM_API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
 DB_HOST = os.getenv("DB_HOST")
+DB_PORT = int(os.getenv("DB_PORT", 3306))
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
@@ -42,31 +43,18 @@ CHANNELS = [
 
 client = OpenAI(api_key=OPENAI_KEY)
 
-
 # ─────────────────────────────────────────────────────────────
 # Database Handler
 # ─────────────────────────────────────────────────────────────
+
+
 class DatabaseHandler:
     """Handles database operations for product storage."""
 
     def __init__(self):
         self.connection: Optional[mysql.connector.MySQLConnection] = None
-        self.ensure_database_exists()
         self.connect()
         self.create_table()
-
-    @staticmethod
-    def ensure_database_exists() -> None:
-        """Ensure the target database exists."""
-        try:
-            with mysql.connector.connect(
-                host=DB_HOST, user=DB_USER, password=DB_PASSWORD
-            ) as conn:
-                cursor = conn.cursor()
-                cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
-                print(f"✅ Database '{DB_NAME}' is ready")
-        except Error as e:
-            print(f"❌ Error creating database: {e}")
 
     def connect(self) -> None:
         """Establish MySQL connection."""
@@ -75,18 +63,19 @@ class DatabaseHandler:
                 return
             self.connection = mysql.connector.connect(
                 host=DB_HOST,
+                port=DB_PORT,
                 user=DB_USER,
                 password=DB_PASSWORD,
                 database=DB_NAME,
                 autocommit=True,
             )
-            print("✅ Connected to MySQL database")
+            print("✅ Connected to Live DB")
         except Error as e:
-            print(f"❌ Error connecting to MySQL: {e}")
+            print(f"❌ Error connecting to Live DB: {e}")
             self.connection = None
 
     def create_table(self) -> None:
-        """Create products table if it doesn't exist."""
+        """Create products table if it doesn't exist, optimized for DECIMAL price storage."""
         if not self.connection:
             return
 
@@ -95,37 +84,39 @@ class DatabaseHandler:
             id INT AUTO_INCREMENT PRIMARY KEY,
             product_name VARCHAR(500),
             product_description LONGTEXT,
-            product_price DOUBLE,
+            product_price DECIMAL(10,2),
             channel_name VARCHAR(255),
             message_id BIGINT,
             timestamp DATETIME,
             media_url TEXT,
             source_type VARCHAR(50),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE KEY unique_message (channel_name, message_id)
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
 
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(query)
-            print("✅ Products table is ready")
+            print("✅ Products table created successfully")
         except Error as e:
             print(f"❌ Error creating table: {e}")
 
     def insert_product(self, product: dict) -> bool:
-        """Insert or update a product record."""
+        """Insert or update a product record with proper DECIMAL price formatting."""
         if not self.connection:
             return False
 
         if is_spammy_text(product.get("product_name", "")) or \
-           is_spammy_text(product.get("product_description", "")):
+                is_spammy_text(product.get("product_description", "")):
             print("🚫 Ignored spammy product message.")
             return False
 
         price_raw = str(product.get("product_price", "")).strip()
         match = re.search(r"(\d+(?:\.\d{1,2})?)", price_raw)
-        product_price = float(match.group(1)) if match else 0.0
+        if match:
+            product_price = round(float(match.group(1)), 2)
+        else:
+            product_price = 0.00
 
         query = """
         INSERT INTO products (
@@ -157,16 +148,11 @@ class DatabaseHandler:
             print(f"❌ Error inserting product: {e}")
             return False
 
-    def close(self) -> None:
-        """Close database connection."""
-        if self.connection and self.connection.is_connected():
-            self.connection.close()
-            print("🔒 Database connection closed")
-
-
 # ─────────────────────────────────────────────────────────────
 # Spam Detection
 # ─────────────────────────────────────────────────────────────
+
+
 def is_spammy_text(text: str, product_price: str = "0") -> bool:
     """Detect spammy or irrelevant text."""
     text = (text or "").strip()
@@ -281,7 +267,6 @@ def analyze_message(text: str, channel_name: str) -> dict:
     product_description = clean_description(
         lines[1:]) if len(lines) > 1 else ""
 
-    # OpenAI analysis
     prompt = f"""
         Extract product_name and product_description from the Telegram message.
         Rules:
@@ -307,7 +292,6 @@ def analyze_message(text: str, channel_name: str) -> dict:
     except Exception as e:
         print(f"❌ OpenAI error: {e}")
 
-    # Ensure product code inclusion
     if product_code and product_code.upper() not in product_name.upper():
         if not product_description or len(product_description.split()) <= 2:
             product_name = f"{product_name} {product_code}".strip()
@@ -317,11 +301,9 @@ def analyze_message(text: str, channel_name: str) -> dict:
                 re.escape(product_code), "", product_description, flags=re.I).strip()
             product_name = f"{product_name} {product_code}".strip()
 
-        # --- Final cleanup ---
     product_name = re.sub(r"\s{2,}", " ", product_name).strip()
     product_description = re.sub(r"\s{2,}", " ", product_description).strip()
 
-    # ✅ Always return even if price = 0 (don’t block)
     return {
         "product_name": product_name,
         "product_description": product_description,
@@ -370,7 +352,6 @@ async def scrape_past_week(tg_client: TelegramClient, db: DatabaseHandler, days:
                 "source_type": "telegram",
             }
 
-            # ✅ Save image as 'downloads/photo_<message_id>.jpg'
             if isinstance(msg.media, MessageMediaPhoto):
                 try:
                     file_path = os.path.join(
@@ -443,7 +424,6 @@ async def scrape_channels() -> None:
 
     usernames = [channel_username_from_url(c) for c in CHANNELS]
 
-    # Step 1️⃣: Join all target channels
     for username in usernames:
         try:
             await tg_client(JoinChannelRequest(username))
@@ -452,17 +432,14 @@ async def scrape_channels() -> None:
             print(
                 f"⚠️ Could not join or already joined channel {username}: {e}")
 
-    # Step 2️⃣: Fetch messages from the past 7 days
     print("\n⏳ Fetching messages from the past 7 days...\n")
     await scrape_past_week(tg_client, db, days=7)
     print("\n✅ Completed past week data backfill.\n")
 
-    # Step 3️⃣: Register real-time message handlers
     register_realtime_handlers(tg_client, db)
     print("▶️ Real-time monitoring started for channels:", usernames)
 
     try:
-        # Keep the client running indefinitely for live updates
         await tg_client.run_until_disconnected()
     except (KeyboardInterrupt, asyncio.CancelledError):
         print("🛑 Stopping scraper...")
