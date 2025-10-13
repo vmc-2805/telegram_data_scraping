@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 {% include 'includes/header.html' %}
 
 <body id="page-top">
@@ -10,7 +9,6 @@
             <div id="content">
                 {% include 'includes/navbar.html' %}
 
-
                 {% block content %}
                 <div class="container-fluid" id="container-wrapper">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -18,31 +16,30 @@
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="./">Home</a></li>
                             <li class="breadcrumb-item">Pages</li>
-                            <li class="breadcrumb-item active" aria-current="page">Same Products</li>
+                            <li class="breadcrumb-item active" aria-current="page">Zero Price Products</li>
                         </ol>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-lg-12">
-                            <div class="card shadow mb-4">
-                                <div class="card-body table-responsive">
-                                    <table class="table table" id="same_products_table">
-                                        <thead class="thead-light">
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Description</th>
-                                                <th>Price</th>
-                                                <th>Channel</th>
-                                                <th>Source Type</th>
-                                                <th>Date</th>
-                                                <th>Image</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
-                                </div>
-
+                        <div class="card shadow mb-4 col-lg-12">
+                            <div class="card-body table-responsive">
+                                <table class="table table" id="zero_price_products_table">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Price</th>
+                                            <th>Channel</th>
+                                            <th>Source Type</th>
+                                            <th>Date</th>
+                                            <th>Image</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
                             </div>
+
                         </div>
+
                     </div>
                 </div>
                 {% endblock %}

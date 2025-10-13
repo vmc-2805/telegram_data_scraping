@@ -3,6 +3,10 @@
 
 {% include 'includes/header.html' %}
 
+<style>
+
+</style>
+
 <body id="page-top">
   <div id="wrapper">
     {% include 'includes/sidebar.html' %}
@@ -22,18 +26,15 @@
               <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
             </ol>
           </div>
-
-      
-
           <div class="row mb-3">
 
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row align-items-center">
-                    <div class=" col mr-2">
-                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Product</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">{{ products | length }}</div>
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Products</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="total_products">00</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-box-open fa-2x text-primary"></i>
@@ -42,13 +43,14 @@
                 </div>
               </div>
             </div>
+
             <div class="col-xl-3 col-md-6 mb-4">
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Same Products</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">4500</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="same_products">00</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-clone fa-2x text-success"></i>
@@ -62,9 +64,10 @@
               <div class="card h-100">
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
+
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Total Channels</div>
-                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{unique_channels}}</div>
+                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" id="total_channels">00</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-network-wired fa-2x text-info"></i>
@@ -80,7 +83,7 @@
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                       <div class="text-xs font-weight-bold text-uppercase mb-1">Low Price Products</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">5000</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800" id="low_price_products">00</div>
                     </div>
                     <div class="col-auto">
                       <i class="fas fa-tags fa-2x text-warning"></i>
@@ -89,51 +92,32 @@
                 </div>
               </div>
             </div>
-
             <div class="col-lg-12">
-              <div class="card mb-4">
+
+              <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">All Products</h6>
+                  <h5 class="m-0 font-weight-bold text-primary">All Products Data</h5>
                 </div>
-                <div class="table-responsive p-3">
-                  <table class="table align-items-center table-flush table-hover" id="dataTableHover">
+                <div class="card-body table-responsive">
+
+                  <table class="table table" id="all_products_table">
                     <thead class="thead-light">
                       <tr>
                         <th>Name</th>
                         <th>Description</th>
                         <th>Price</th>
-                        <th>Channels</th>
+                        <th>Channel</th>
                         <th>Source Type</th>
+                        <th>Date</th>
                         <th>Image</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {% for product in products %}
-                      <tr>
-                        <td>{{ product.product_name }}</td>
-                        <td>{{ product.product_description }}</td>
-                        <td>{{ product.product_price }}</td>
-                        <td>{{ product.channel_name }}</td>
-                        <td>{{ product.source_type }}</td>
-                        <td>
-                          {% if product.media_url %}
-                          <img src="{{ product.media_url }}" alt="Product Image" width="40" height="30">
-                          {% else %}
-                          <span class="text-muted">No Image</span>
-                          {% endif %}
-                        </td>
-
-                      </tr>
-                      {% endfor %}
-                    </tbody>
+                    <tbody></tbody>
                   </table>
                 </div>
               </div>
             </div>
-
           </div>
-
-
 
         </div>
         {% endblock %}
@@ -148,12 +132,7 @@
   </a>
 
   {% include 'includes/scripts.html' %}
-  <script>
-    $(document).ready(function () {
-      $('#dataTable').DataTable();
-      $('#dataTableHover').DataTable();
-    });
-  </script>
+
 </body>
 
 </html>

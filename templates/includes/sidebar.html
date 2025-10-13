@@ -1,4 +1,4 @@
-<ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+<ul class="navbar-nav sidebar sidebar-light accordion sticky-top vh-100" id="accordionSidebar">
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
         <div class="sidebar-brand-icon">
             <img src="{{ url_for('static', path='img/logo/logo2.png') }}">
@@ -25,11 +25,19 @@
     </li>
 
     <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('similar_products') }}">
-            <i class="fas fa-project-diagram"></i>
-            <span>Similar Product</span>
+        <a class="nav-link" href="{{ url_for('low_price_products') }}">
+            <i class="fas fa-tags fa-2x"></i>
+            <span>Low Price Product</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('zero_price_products') }}">
+            <i class="fas fa-ban "></i>
+            <span>Zero Price Product</span>
+        </a>
+    </li>
+
+
 
     <hr class="sidebar-divider">
 </ul>
