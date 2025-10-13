@@ -78,29 +78,29 @@ a:focus {
 
 @-webkit-keyframes growIn {
   0% {
-      -webkit-transform: scale(.9);
-      transform: scale(.9);
-      opacity: 0
+    -webkit-transform: scale(.9);
+    transform: scale(.9);
+    opacity: 0
   }
 
   100% {
-      -webkit-transform: scale(1);
-      transform: scale(1);
-      opacity: 1
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity: 1
   }
 }
 
 @keyframes growIn {
   0% {
-      -webkit-transform: scale(.9);
-      transform: scale(.9);
-      opacity: 0
+    -webkit-transform: scale(.9);
+    transform: scale(.9);
+    opacity: 0
   }
 
   100% {
-      -webkit-transform: scale(1);
-      transform: scale(1);
-      opacity: 1
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity: 1
   }
 }
 
@@ -116,21 +116,21 @@ a:focus {
 
 @-webkit-keyframes fadeIn {
   0% {
-      opacity: 0
+    opacity: 0
   }
 
   100% {
-      opacity: 1
+    opacity: 1
   }
 }
 
 @keyframes fadeIn {
   0% {
-      opacity: 0
+    opacity: 0
   }
 
   100% {
-      opacity: 1
+    opacity: 1
   }
 }
 
@@ -563,20 +563,20 @@ a:focus {
 
 @media (min-width:576px) {
   .topbar .dropdown {
-      position: relative
+    position: relative
   }
 
   .topbar .dropdown .dropdown-menu {
-      width: auto;
-      right: 0
+    width: auto;
+    right: 0
   }
 
   .topbar .dropdown-list {
-      width: 20rem !important
+    width: 20rem !important
   }
 
   .topbar .dropdown-list .dropdown-item .text-truncate {
-      max-width: 13.375rem
+    max-width: 13.375rem
   }
 }
 
@@ -898,189 +898,189 @@ a:focus {
 
 @media (max-width:768px) {
   #container-wrapper {
-      min-width: 100vw
+    min-width: 100vw
   }
 
   .sidebar.toggled {
-      width: 100vw !important;
-      transition: all .3s ease-in-out;
-      -webkit-transition: all .3s ease-in-out
+    width: 100vw !important;
+    transition: all .3s ease-in-out;
+    -webkit-transition: all .3s ease-in-out
   }
 
   .sidebar.toggled .nav-item {
-      margin-left: -1rem;
-      position: relative;
-      margin-bottom: -15px
+    margin-left: -1rem;
+    position: relative;
+    margin-bottom: -15px
   }
 
   .sidebar.toggled .nav-item .nav-link {
-      display: block;
-      width: 100%;
-      text-align: left;
-      padding: 1rem;
-      width: 14rem
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 1rem;
+    width: 14rem
   }
 
   .sidebar.toggled .nav-item .nav-link i {
-      font-size: .85rem;
-      margin-top: .4rem;
-      margin-right: .5rem
+    font-size: .85rem;
+    margin-top: .4rem;
+    margin-right: .5rem
   }
 
   .sidebar.toggled .nav-item .nav-link span {
-      font-size: .85rem;
-      display: inline
+    font-size: .85rem;
+    display: inline
   }
 
   .sidebar.toggled .nav-item.active .nav-link {
-      font-weight: 700
+    font-weight: 700
   }
 
   .sidebar.toggled .nav-item .nav-link[data-toggle=collapse]::after {
-      width: 1rem;
-      text-align: center;
-      float: right;
-      vertical-align: 0;
-      border: 0;
-      font-weight: 900;
-      content: '\f107';
-      font-family: 'Font Awesome 5 Free'
+    width: 1rem;
+    text-align: center;
+    float: right;
+    vertical-align: 0;
+    border: 0;
+    font-weight: 900;
+    content: '\f107';
+    font-family: 'Font Awesome 5 Free'
   }
 
   .sidebar.toggled .nav-item .nav-link[data-toggle=collapse].collapsed::after {
-      content: '\f105'
+    content: '\f105'
   }
 
   .sidebar.toggled .nav-item .collapse {
-      position: relative;
-      padding-left: 1rem;
-      left: 0;
-      z-index: 1;
-      top: 0;
-      -webkit-transition: height .15s ease;
-      transition: height .15s ease
+    position: relative;
+    padding-left: 1rem;
+    left: 0;
+    z-index: 1;
+    top: 0;
+    -webkit-transition: height .15s ease;
+    transition: height .15s ease
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner {
-      border-radius: .35rem;
-      -webkit-box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15);
-      box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15)
+    border-radius: .35rem;
+    -webkit-box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15);
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15)
   }
 
   .sidebar.toggled .nav-item .collapse,
   .sidebar.toggled .nav-item .collapsing {
-      margin: 0 1rem
+    margin: 0 1rem
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner,
   .sidebar.toggled .nav-item .collapsing .collapse-inner {
-      padding: .5rem 0;
-      min-width: 10rem;
-      font-size: .85rem;
-      margin: 0 0 1rem 0
+    padding: .5rem 0;
+    min-width: 10rem;
+    font-size: .85rem;
+    margin: 0 0 1rem 0
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner .collapse-header,
   .sidebar.toggled .nav-item .collapsing .collapse-inner .collapse-header {
-      margin: 0;
-      white-space: nowrap;
-      padding: .5rem 1.5rem;
-      text-transform: uppercase;
-      font-weight: 800;
-      font-size: .65rem;
-      color: #b7b9cc
+    margin: 0;
+    white-space: nowrap;
+    padding: .5rem 1.5rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    font-size: .65rem;
+    color: #b7b9cc
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner .collapse-item,
   .sidebar.toggled .nav-item .collapsing .collapse-inner .collapse-item {
-      padding: .5rem 1rem;
-      margin: 0 .5rem;
-      display: block;
-      color: #3a3b45;
-      text-decoration: none;
-      border-radius: .35rem;
-      white-space: nowrap
+    padding: .5rem 1rem;
+    margin: 0 .5rem;
+    display: block;
+    color: #3a3b45;
+    text-decoration: none;
+    border-radius: .35rem;
+    white-space: nowrap
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner .collapse-item:hover,
   .sidebar.toggled .nav-item .collapsing .collapse-inner .collapse-item:hover {
-      background-color: #eaecf4;
-      transition: all .3s ease-in-out;
-      -webkit-transition: all .3s ease-in-out
+    background-color: #eaecf4;
+    transition: all .3s ease-in-out;
+    -webkit-transition: all .3s ease-in-out
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner .collapse-item:active,
   .sidebar.toggled .nav-item .collapsing .collapse-inner .collapse-item:active {
-      background-color: #dddfeb
+    background-color: #dddfeb
   }
 
   .sidebar.toggled .nav-item .collapse .collapse-inner .collapse-item.active,
   .sidebar.toggled .nav-item .collapsing .collapse-inner .collapse-item.active {
-      color: #3f51b5;
-      font-weight: 800
+    color: #3f51b5;
+    font-weight: 800
   }
 
   .sidebar.toggled .sidebar-brand {
-      height: 4.375rem;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: 800;
-      padding: 1.5rem 1rem;
-      text-align: center;
-      letter-spacing: .05rem;
-      z-index: 1
+    height: 4.375rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 800;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    letter-spacing: .05rem;
+    z-index: 1
   }
 
   .sidebar.toggled hr.sidebar-divider {
-      margin: 1rem 0 1rem 0
+    margin: 1rem 0 1rem 0
   }
 
   .sidebar.toggled .sidebar-heading {
-      display: block;
-      text-align: left;
-      padding: 0 1rem;
-      font-weight: 800;
-      font-size: .65rem;
-      letter-spacing: .13rem
+    display: block;
+    text-align: left;
+    padding: 0 1rem;
+    font-weight: 800;
+    font-size: .65rem;
+    letter-spacing: .13rem
   }
 
   .sidebar.toggled .sidebar-brand .sidebar-brand-text {
-      display: inline
+    display: inline
   }
 
   .sidebar {
-      width: 0 !important;
-      overflow: hidden;
-      transition: all .3s ease;
-      -webkit-transition: all .3s ease
+    width: 0 !important;
+    overflow: hidden;
+    transition: all .3s ease;
+    -webkit-transition: all .3s ease
   }
 
   .sidebar .sidebar-brand {
-      overflow: hidden
+    overflow: hidden
   }
 
   .sidebar .sidebar-brand .sidebar-brand-text {
-      overflow: hidden
+    overflow: hidden
   }
 
   .sidebar .nav-item {
-      overflow: hidden
+    overflow: hidden
   }
 
   .sidebar .sidebar-brand .sidebar-brand-icon img {
-      overflow: hidden
+    overflow: hidden
   }
 
   .sidebar hr.sidebar-divider {
-      margin: 1rem 0 1rem 0
+    margin: 1rem 0 1rem 0
   }
 
   .topbar .navbar-search {
-      width: 100%
+    width: 100%
   }
 
   .login-form {
-      padding: 3rem 2rem !important
+    padding: 3rem 2rem !important
   }
 }
 
@@ -1294,7 +1294,7 @@ a:focus {
 
 @media (min-width:768px) {
   .chart-area {
-      height: 20rem
+    height: 20rem
   }
 }
 
@@ -1306,7 +1306,7 @@ a:focus {
 
 @media (min-width:768px) {
   .chart-bar {
-      height: 20rem
+    height: 20rem
   }
 }
 
@@ -1318,7 +1318,7 @@ a:focus {
 
 @media (min-width:768px) {
   .chart-pie {
-      height: calc(20rem - 43px) !important
+    height: calc(20rem - 43px) !important
   }
 }
 
@@ -1433,173 +1433,173 @@ a:focus {
 
 @-webkit-keyframes noise-anim {
   0% {
-      clip: rect(31px, 9999px, 91px, 0)
+    clip: rect(31px, 9999px, 91px, 0)
   }
 
   5% {
-      clip: rect(70px, 9999px, 29px, 0)
+    clip: rect(70px, 9999px, 29px, 0)
   }
 
   10% {
-      clip: rect(3px, 9999px, 56px, 0)
+    clip: rect(3px, 9999px, 56px, 0)
   }
 
   15% {
-      clip: rect(7px, 9999px, 78px, 0)
+    clip: rect(7px, 9999px, 78px, 0)
   }
 
   20% {
-      clip: rect(97px, 9999px, 4px, 0)
+    clip: rect(97px, 9999px, 4px, 0)
   }
 
   25% {
-      clip: rect(24px, 9999px, 60px, 0)
+    clip: rect(24px, 9999px, 60px, 0)
   }
 
   30% {
-      clip: rect(80px, 9999px, 41px, 0)
+    clip: rect(80px, 9999px, 41px, 0)
   }
 
   35% {
-      clip: rect(78px, 9999px, 14px, 0)
+    clip: rect(78px, 9999px, 14px, 0)
   }
 
   40% {
-      clip: rect(20px, 9999px, 23px, 0)
+    clip: rect(20px, 9999px, 23px, 0)
   }
 
   45% {
-      clip: rect(70px, 9999px, 61px, 0)
+    clip: rect(70px, 9999px, 61px, 0)
   }
 
   50% {
-      clip: rect(65px, 9999px, 89px, 0)
+    clip: rect(65px, 9999px, 89px, 0)
   }
 
   55% {
-      clip: rect(74px, 9999px, 25px, 0)
+    clip: rect(74px, 9999px, 25px, 0)
   }
 
   60% {
-      clip: rect(76px, 9999px, 84px, 0)
+    clip: rect(76px, 9999px, 84px, 0)
   }
 
   65% {
-      clip: rect(56px, 9999px, 10px, 0)
+    clip: rect(56px, 9999px, 10px, 0)
   }
 
   70% {
-      clip: rect(85px, 9999px, 58px, 0)
+    clip: rect(85px, 9999px, 58px, 0)
   }
 
   75% {
-      clip: rect(46px, 9999px, 71px, 0)
+    clip: rect(46px, 9999px, 71px, 0)
   }
 
   80% {
-      clip: rect(6px, 9999px, 64px, 0)
+    clip: rect(6px, 9999px, 64px, 0)
   }
 
   85% {
-      clip: rect(20px, 9999px, 84px, 0)
+    clip: rect(20px, 9999px, 84px, 0)
   }
 
   90% {
-      clip: rect(57px, 9999px, 26px, 0)
+    clip: rect(57px, 9999px, 26px, 0)
   }
 
   95% {
-      clip: rect(36px, 9999px, 92px, 0)
+    clip: rect(36px, 9999px, 92px, 0)
   }
 
   100% {
-      clip: rect(12px, 9999px, 53px, 0)
+    clip: rect(12px, 9999px, 53px, 0)
   }
 }
 
 @keyframes noise-anim {
   0% {
-      clip: rect(31px, 9999px, 91px, 0)
+    clip: rect(31px, 9999px, 91px, 0)
   }
 
   5% {
-      clip: rect(70px, 9999px, 29px, 0)
+    clip: rect(70px, 9999px, 29px, 0)
   }
 
   10% {
-      clip: rect(3px, 9999px, 56px, 0)
+    clip: rect(3px, 9999px, 56px, 0)
   }
 
   15% {
-      clip: rect(7px, 9999px, 78px, 0)
+    clip: rect(7px, 9999px, 78px, 0)
   }
 
   20% {
-      clip: rect(97px, 9999px, 4px, 0)
+    clip: rect(97px, 9999px, 4px, 0)
   }
 
   25% {
-      clip: rect(24px, 9999px, 60px, 0)
+    clip: rect(24px, 9999px, 60px, 0)
   }
 
   30% {
-      clip: rect(80px, 9999px, 41px, 0)
+    clip: rect(80px, 9999px, 41px, 0)
   }
 
   35% {
-      clip: rect(78px, 9999px, 14px, 0)
+    clip: rect(78px, 9999px, 14px, 0)
   }
 
   40% {
-      clip: rect(20px, 9999px, 23px, 0)
+    clip: rect(20px, 9999px, 23px, 0)
   }
 
   45% {
-      clip: rect(70px, 9999px, 61px, 0)
+    clip: rect(70px, 9999px, 61px, 0)
   }
 
   50% {
-      clip: rect(65px, 9999px, 89px, 0)
+    clip: rect(65px, 9999px, 89px, 0)
   }
 
   55% {
-      clip: rect(74px, 9999px, 25px, 0)
+    clip: rect(74px, 9999px, 25px, 0)
   }
 
   60% {
-      clip: rect(76px, 9999px, 84px, 0)
+    clip: rect(76px, 9999px, 84px, 0)
   }
 
   65% {
-      clip: rect(56px, 9999px, 10px, 0)
+    clip: rect(56px, 9999px, 10px, 0)
   }
 
   70% {
-      clip: rect(85px, 9999px, 58px, 0)
+    clip: rect(85px, 9999px, 58px, 0)
   }
 
   75% {
-      clip: rect(46px, 9999px, 71px, 0)
+    clip: rect(46px, 9999px, 71px, 0)
   }
 
   80% {
-      clip: rect(6px, 9999px, 64px, 0)
+    clip: rect(6px, 9999px, 64px, 0)
   }
 
   85% {
-      clip: rect(20px, 9999px, 84px, 0)
+    clip: rect(20px, 9999px, 84px, 0)
   }
 
   90% {
-      clip: rect(57px, 9999px, 26px, 0)
+    clip: rect(57px, 9999px, 26px, 0)
   }
 
   95% {
-      clip: rect(36px, 9999px, 92px, 0)
+    clip: rect(36px, 9999px, 92px, 0)
   }
 
   100% {
-      clip: rect(12px, 9999px, 53px, 0)
+    clip: rect(12px, 9999px, 53px, 0)
   }
 }
 
@@ -1618,173 +1618,173 @@ a:focus {
 
 @-webkit-keyframes noise-anim-2 {
   0% {
-      clip: rect(68px, 9999px, 1px, 0)
+    clip: rect(68px, 9999px, 1px, 0)
   }
 
   5% {
-      clip: rect(44px, 9999px, 53px, 0)
+    clip: rect(44px, 9999px, 53px, 0)
   }
 
   10% {
-      clip: rect(72px, 9999px, 43px, 0)
+    clip: rect(72px, 9999px, 43px, 0)
   }
 
   15% {
-      clip: rect(18px, 9999px, 16px, 0)
+    clip: rect(18px, 9999px, 16px, 0)
   }
 
   20% {
-      clip: rect(6px, 9999px, 72px, 0)
+    clip: rect(6px, 9999px, 72px, 0)
   }
 
   25% {
-      clip: rect(18px, 9999px, 16px, 0)
+    clip: rect(18px, 9999px, 16px, 0)
   }
 
   30% {
-      clip: rect(93px, 9999px, 46px, 0)
+    clip: rect(93px, 9999px, 46px, 0)
   }
 
   35% {
-      clip: rect(100px, 9999px, 33px, 0)
+    clip: rect(100px, 9999px, 33px, 0)
   }
 
   40% {
-      clip: rect(27px, 9999px, 29px, 0)
+    clip: rect(27px, 9999px, 29px, 0)
   }
 
   45% {
-      clip: rect(5px, 9999px, 64px, 0)
+    clip: rect(5px, 9999px, 64px, 0)
   }
 
   50% {
-      clip: rect(40px, 9999px, 65px, 0)
+    clip: rect(40px, 9999px, 65px, 0)
   }
 
   55% {
-      clip: rect(72px, 9999px, 49px, 0)
+    clip: rect(72px, 9999px, 49px, 0)
   }
 
   60% {
-      clip: rect(44px, 9999px, 39px, 0)
+    clip: rect(44px, 9999px, 39px, 0)
   }
 
   65% {
-      clip: rect(84px, 9999px, 45px, 0)
+    clip: rect(84px, 9999px, 45px, 0)
   }
 
   70% {
-      clip: rect(99px, 9999px, 56px, 0)
+    clip: rect(99px, 9999px, 56px, 0)
   }
 
   75% {
-      clip: rect(87px, 9999px, 20px, 0)
+    clip: rect(87px, 9999px, 20px, 0)
   }
 
   80% {
-      clip: rect(52px, 9999px, 8px, 0)
+    clip: rect(52px, 9999px, 8px, 0)
   }
 
   85% {
-      clip: rect(64px, 9999px, 22px, 0)
+    clip: rect(64px, 9999px, 22px, 0)
   }
 
   90% {
-      clip: rect(51px, 9999px, 69px, 0)
+    clip: rect(51px, 9999px, 69px, 0)
   }
 
   95% {
-      clip: rect(2px, 9999px, 11px, 0)
+    clip: rect(2px, 9999px, 11px, 0)
   }
 
   100% {
-      clip: rect(19px, 9999px, 40px, 0)
+    clip: rect(19px, 9999px, 40px, 0)
   }
 }
 
 @keyframes noise-anim-2 {
   0% {
-      clip: rect(68px, 9999px, 1px, 0)
+    clip: rect(68px, 9999px, 1px, 0)
   }
 
   5% {
-      clip: rect(44px, 9999px, 53px, 0)
+    clip: rect(44px, 9999px, 53px, 0)
   }
 
   10% {
-      clip: rect(72px, 9999px, 43px, 0)
+    clip: rect(72px, 9999px, 43px, 0)
   }
 
   15% {
-      clip: rect(18px, 9999px, 16px, 0)
+    clip: rect(18px, 9999px, 16px, 0)
   }
 
   20% {
-      clip: rect(6px, 9999px, 72px, 0)
+    clip: rect(6px, 9999px, 72px, 0)
   }
 
   25% {
-      clip: rect(18px, 9999px, 16px, 0)
+    clip: rect(18px, 9999px, 16px, 0)
   }
 
   30% {
-      clip: rect(93px, 9999px, 46px, 0)
+    clip: rect(93px, 9999px, 46px, 0)
   }
 
   35% {
-      clip: rect(100px, 9999px, 33px, 0)
+    clip: rect(100px, 9999px, 33px, 0)
   }
 
   40% {
-      clip: rect(27px, 9999px, 29px, 0)
+    clip: rect(27px, 9999px, 29px, 0)
   }
 
   45% {
-      clip: rect(5px, 9999px, 64px, 0)
+    clip: rect(5px, 9999px, 64px, 0)
   }
 
   50% {
-      clip: rect(40px, 9999px, 65px, 0)
+    clip: rect(40px, 9999px, 65px, 0)
   }
 
   55% {
-      clip: rect(72px, 9999px, 49px, 0)
+    clip: rect(72px, 9999px, 49px, 0)
   }
 
   60% {
-      clip: rect(44px, 9999px, 39px, 0)
+    clip: rect(44px, 9999px, 39px, 0)
   }
 
   65% {
-      clip: rect(84px, 9999px, 45px, 0)
+    clip: rect(84px, 9999px, 45px, 0)
   }
 
   70% {
-      clip: rect(99px, 9999px, 56px, 0)
+    clip: rect(99px, 9999px, 56px, 0)
   }
 
   75% {
-      clip: rect(87px, 9999px, 20px, 0)
+    clip: rect(87px, 9999px, 20px, 0)
   }
 
   80% {
-      clip: rect(52px, 9999px, 8px, 0)
+    clip: rect(52px, 9999px, 8px, 0)
   }
 
   85% {
-      clip: rect(64px, 9999px, 22px, 0)
+    clip: rect(64px, 9999px, 22px, 0)
   }
 
   90% {
-      clip: rect(51px, 9999px, 69px, 0)
+    clip: rect(51px, 9999px, 69px, 0)
   }
 
   95% {
-      clip: rect(2px, 9999px, 11px, 0)
+    clip: rect(2px, 9999px, 11px, 0)
   }
 
   100% {
-      clip: rect(19px, 9999px, 40px, 0)
+    clip: rect(19px, 9999px, 40px, 0)
   }
 }
 
@@ -1802,7 +1802,7 @@ a:focus {
 }
 
 footer.sticky-footer {
-  padding: 2rem 0;
+  padding: 1rem 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
   -webkit-box-shadow: 0 .15rem 1.75rem 0 rgba(58, 59, 69, .15);
@@ -1919,3 +1919,11 @@ body.sidebar-toggled footer.sticky-footer {
   border-color: #3f51b5
 }
 
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: transparent !important;
+  border: none;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  padding: 0 !important;
+}

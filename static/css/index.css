@@ -1,0 +1,20 @@
+.nowrap-column {
+  white-space: nowrap;
+}
+
+.dataTables_length {
+  display: flex;
+  align-items: end;
+  white-space: nowrap;
+  gap: 0.5rem;
+  justify-content: space-evenly;
+}
+
+.custom-select.custom-select-sm.form-control.form-control-sm {
+  width: 50px;
+  
+}
+
+#all_products_table_wrapper > .row {
+  align-items: end;
+}

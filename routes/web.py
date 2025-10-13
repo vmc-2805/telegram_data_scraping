@@ -16,7 +16,10 @@ from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
 from database import get_db
 from models.admin import Admin
-from collections import Counter
+from fastapi import Query, Depends
+from fastapi.responses import JSONResponse
+from models.product import Product
+from sqlalchemy import func
 
 
 router = APIRouter()
@@ -35,41 +38,56 @@ def read_root(request: Request):
     token = request.cookies.get("access_token")
     if not token:
         return RedirectResponse(url="/login")
-
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
-        user_name = None
 
         db = next(get_db())
         user = db.query(Admin).filter(Admin.email == email).first()
-        if user:
-            user_name = user.name
-        else:
-            user_name = email
-
-        products = UserLogin.all_product(db)
-
-        # ✅ Count products by channel
-        channel_counts = Counter([p.channel_name for p in products if p.channel_name])
-        unique_channels = len(channel_counts)
+        user_name = user.name if user else email
 
     except JWTError:
         return RedirectResponse(url="/login")
 
     response = templates.TemplateResponse(
         "index.html",
-        {
-            "request": request,
-            "user_name": user_name,
-            "products": products,
-            "unique_channels": unique_channels,
-        },
+        {"request": request, "user_name": user_name},
     )
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+@router.get("/dashboard_counts")
+def dashboard_counts(db: Session = Depends(get_db)):
+    total_products = db.query(Product).count()
+
+    same_products_data = UserLogin.SameProductsData(
+        db=db, page=1, per_page=10_000, search_value=""
+    )
+    total_same_products = same_products_data.get(
+        "total", len(same_products_data.get("products", []))
+    )
+
+    total_channels = db.query(Product.channel_name).distinct().count()
+
+    low_price_data = UserLogin.low_price_products_data(
+        db=db, page=1, per_page=10_000, search_value=""
+    )
+    total_low_price = low_price_data.get(
+        "total", len(low_price_data.get("products", []))
+    )
+
+    return {
+        "total_products": total_products,
+        "same_products": total_same_products,
+        "total_channels": total_channels,
+        "low_price_products": total_low_price,
+    }
+
+
+
 
 
 @router.get("/login")
@@ -110,8 +128,23 @@ def logout_endpoint(token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/all_product")
-def all_product():
-    return UserLogin.all_product()
+async def all_product(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    page = int(form.get("page", 1))
+    per_page = int(form.get("per_page", 50))
+    draw = int(form.get("draw", 1))
+    search_value = form.get("search_value", "")
+
+    data = UserLogin.all_product(db, page, per_page, search_value)
+
+    return JSONResponse(
+        {
+            "draw": draw,
+            "recordsTotal": data["total"],
+            "recordsFiltered": data["total_filtered"],
+            "data": data["products"],
+        }
+    )
 
 
 @router.get("/same_products")
@@ -126,21 +159,41 @@ def same_products(request: Request):
 
         db = next(get_db())
         user = db.query(Admin).filter(Admin.email == email).first()
-        if user:
-            user_name = user.name
-        else:
-            user_name = email
+        user_name = user.name if user else email
 
     except JWTError:
         return RedirectResponse(url="/login")
 
     return templates.TemplateResponse(
-            "same_products.html",
-            {"request": request, "user_name": user_name}
-        )
+        "same_products.html",
+        {"request": request, "user_name": user_name},
+    )
 
-@router.get("/similar_products")
-def similar_products(request: Request):
+
+@router.post("/same_products_data")
+async def same_products_data(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    page = int(form.get("page", 1))
+    per_page = int(form.get("per_page", 50))
+    draw = int(form.get("draw", 1))
+    search_value = form.get("search_value", "")
+
+    products_data = UserLogin.SameProductsData(
+        db, page=page, per_page=per_page, search_value=search_value
+    )
+
+    return JSONResponse(
+        {
+            "draw": draw,
+            "recordsTotal": products_data["total"],
+            "recordsFiltered": products_data["total_filtered"],
+            "data": products_data["products"],
+        }
+    )
+
+
+@router.get("/low_price_products")
+def low_price_products(request: Request):
     token = request.cookies.get("access_token")
     if not token:
         return RedirectResponse(url="/login")
@@ -160,6 +213,74 @@ def similar_products(request: Request):
         return RedirectResponse(url="/login")
 
     return templates.TemplateResponse(
-            "similar_products.html",
-            {"request": request, "user_name": user_name}
-        )
+        "low_price_products.html",
+        {"request": request, "user_name": user_name},
+    )
+
+
+@router.post("/low_price_products_data")
+async def low_price_products_data(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    page = int(form.get("page", 1))
+    per_page = int(form.get("per_page", 50))
+    draw = int(form.get("draw", 1))
+    search_value = form.get("search_value", "")
+
+    products_data = UserLogin.low_price_products_data(
+        db, page=page, per_page=per_page, search_value=search_value
+    )
+
+    return JSONResponse(
+        {
+            "draw": draw,
+            "recordsTotal": products_data["total"],
+            "recordsFiltered": products_data["total_filtered"],
+            "data": products_data["products"],
+        }
+    )
+
+@router.get("/zero_price_products")
+def zero_price_products(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        return RedirectResponse(url="/login")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+
+        db = next(get_db())
+        user = db.query(Admin).filter(Admin.email == email).first()
+        if user:
+            user_name = user.name
+        else:
+            user_name = email
+
+    except JWTError:
+        return RedirectResponse(url="/login")
+
+    return templates.TemplateResponse(
+        "zero_price_products.html",
+        {"request": request, "user_name": user_name},
+    )
+    
+@router.post("/zero_price_products_data")
+async def zero_price_products_data(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    page = int(form.get("page", 1))
+    per_page = int(form.get("per_page", 50))
+    draw = int(form.get("draw", 1))
+    search_value = form.get("search_value", "")
+
+    products_data = UserLogin.zero_price_products_data(
+        db, page=page, per_page=per_page, search_value=search_value
+    )
+
+    return JSONResponse(
+        {
+            "draw": draw,
+            "recordsTotal": products_data["total"],
+            "recordsFiltered": products_data["total_filtered"],
+            "data": products_data["products"],
+        }
+    )

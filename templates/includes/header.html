@@ -7,21 +7,32 @@
 
     <link href="{{ url_for('static', path='img/logo/logo.png') }}" rel="icon">
     <title>{{ title if title else 'Dashboard' }}</title>
+    <link rel="stylesheet" href="../../static/css/index.css">
 
-    <!-- Font Awesome -->
+
     <link href="{{ url_for('static', path='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
         type="text/css">
 
-    <!-- Bootstrap CSS -->
     <link href="{{ url_for('static', path='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"
         type="text/css">
 
     <!-- Custom CSS -->
     <link href="{{ url_for('static', path='css/ruang-admin.min.css') }}" rel="stylesheet">
 
-    <!-- DataTables CSS -->
-    <link href="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
-    <!-- Custom JS -->
     <script src="{{ url_for('static', path='js/logout.js') }}"></script>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+    
+    <script src="../../static/js/all_product.js"></script>
+    <script src="../../static/js/same_products.js"></script>
+    <script src="../../static/js/low_price_product.js"></script>
+    <script src="../../static/js/dashboard_counts.js"></script>
+    <script src="../../static/js/zero_price.js"></script>
+
+
 </head>
