@@ -6,38 +6,37 @@
         <div class="sidebar-brand-text mx-3">Admin</div>
     </a>
 
-    <hr class="sidebar-divider my-0">
-    <li class="nav-item">
+
+    <li class="nav-item {% if request.url.path == '/' %}active{% endif %}">
         <a class="nav-link" href="/">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
     </li>
 
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider mt-0">
     <div class="sidebar-heading">MENU</div>
 
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('same_products') }}">
+    <li class="nav-item {% if request.url.path.startswith('/same_products') %}active{% endif %} my-0">
+        <a class="nav-link" href="/same_products">
             <i class="fas fa-clone"></i>
             <span>Same Product</span>
         </a>
     </li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('low_price_products') }}">
+    <li class="nav-item {% if request.url.path.startswith('/low_price_products') %}active{% endif %} my-0">
+        <a class="nav-link" href="/low_price_products">
             <i class="fas fa-tags fa-2x"></i>
             <span>Low Price Product</span>
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('zero_price_products') }}">
-            <i class="fas fa-ban "></i>
+
+    <li class="nav-item {% if request.url.path.startswith('/zero_price_products') %}active{% endif %} my-0">
+        <a class="nav-link d-flex align-items-center gap-2" href="/zero_price_products">
+            <i class="fas fa-ban"></i>
             <span>Zero Price Product</span>
         </a>
     </li>
 
-
-
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider mt-0">
 </ul>

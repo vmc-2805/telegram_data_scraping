@@ -11,23 +11,53 @@
 }
 
 .custom-select.custom-select-sm.form-control.form-control-sm {
-  width: 50px;
-  
+  width: 60px;
+
 }
 
-#all_products_table_wrapper > .row {
+#all_products_table_wrapper>.row {
   align-items: end;
 }
 
-#low_price_products_table_wrapper > .row {
+#low_price_products_table_wrapper>.row {
   align-items: end;
 }
 
-#same_products_table_wrapper > .row {
+#same_products_table_wrapper>.row {
   align-items: end;
 }
 
-#zero_price_products_table_wrapper > .row {
+#zero_price_products_table_wrapper>.row {
   align-items: end;
 }
 
+/* Add spacing around sidebar items */
+#accordionSidebar .nav-item {
+    margin: 0.5rem 0; /* top & bottom space between items */
+}
+
+/* Adjust the divider spacing */
+#accordionSidebar .sidebar-divider {
+    margin: 1rem 0; /* space above & below hr */
+}
+
+/* Nav-link hover effect */
+#accordionSidebar .nav-link {
+    padding: 0.75rem 1rem; /* space inside the link */
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+#accordionSidebar .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    padding-left: 1.2rem; /* small shift effect on hover */
+}
+
+/* Active menu item */
+#accordionSidebar .nav-item.active .nav-link {
+    background-color: rgba(13, 110, 253, 0.2);
+    font-weight: 600;
+}

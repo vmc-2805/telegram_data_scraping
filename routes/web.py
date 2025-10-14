@@ -17,7 +17,7 @@ from jose import jwt, JWTError
 from database import get_db
 from models.admin import Admin
 from fastapi import Query, Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from models.product import Product
 from sqlalchemy import func
 
@@ -33,7 +33,7 @@ ALGORITHM = os.getenv("ALGORITHM")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 
-@router.get("/")
+@router.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     token = request.cookies.get("access_token")
     if not token:
@@ -133,8 +133,8 @@ async def all_product(request: Request, db: Session = Depends(get_db)):
     draw = int(form.get("draw", 1))
     search_value = form.get("search_value", "")
 
-    order_column_index = int(form.get("order_column", 1))  
-    order_dir = form.get("order_dir", "asc") 
+    order_column_index = int(form.get("order_column", 1))
+    order_dir = form.get("order_dir", "asc")
 
     data = UserLogin.all_product(
         db, page, per_page, search_value, order_column_index, order_dir
@@ -180,19 +180,20 @@ async def same_products_data(request: Request, db: Session = Depends(get_db)):
     per_page = int(form.get("per_page", 50))
     draw = int(form.get("draw", 1))
     search_value = form.get("search_value", "")
+    order_column = int(form.get("order_column", 1))
+    order_dir = form.get("order_dir", "asc")
 
     products_data = UserLogin.SameProductsData(
-        db, page=page, per_page=per_page, search_value=search_value
+        db, page=page, per_page=per_page, search_value=search_value,
+        order_column=order_column, order_dir=order_dir
     )
 
-    return JSONResponse(
-        {
-            "draw": draw,
-            "recordsTotal": products_data["total"],
-            "recordsFiltered": products_data["total_filtered"],
-            "data": products_data["products"],
-        }
-    )
+    return JSONResponse({
+        "draw": draw,
+        "recordsTotal": products_data["total"],
+        "recordsFiltered": products_data["total_filtered"],
+        "data": products_data["products"],
+    })
 
 
 @router.get("/low_price_products")
@@ -228,19 +229,21 @@ async def low_price_products_data(request: Request, db: Session = Depends(get_db
     per_page = int(form.get("per_page", 50))
     draw = int(form.get("draw", 1))
     search_value = form.get("search_value", "")
+    order_column = int(form.get("order_column", 1))
+    order_dir = form.get("order_dir", "asc")
 
     products_data = UserLogin.low_price_products_data(
-        db, page=page, per_page=per_page, search_value=search_value
+        db, page=page, per_page=per_page, search_value=search_value,
+        order_column=order_column, order_dir=order_dir
     )
 
-    return JSONResponse(
-        {
-            "draw": draw,
-            "recordsTotal": products_data["total"],
-            "recordsFiltered": products_data["total_filtered"],
-            "data": products_data["products"],
-        }
-    )
+    return JSONResponse({
+        "draw": draw,
+        "recordsTotal": products_data["total"],
+        "recordsFiltered": products_data["total_filtered"],
+        "data": products_data["products"]
+    })
+
 
 
 @router.get("/zero_price_products")
@@ -276,16 +279,18 @@ async def zero_price_products_data(request: Request, db: Session = Depends(get_d
     per_page = int(form.get("per_page", 50))
     draw = int(form.get("draw", 1))
     search_value = form.get("search_value", "")
+    order_column = int(form.get("order_column", 1))
+    order_dir = form.get("order_dir", "asc")
 
     products_data = UserLogin.zero_price_products_data(
-        db, page=page, per_page=per_page, search_value=search_value
+        db, page=page, per_page=per_page, search_value=search_value,
+        order_column=order_column, order_dir=order_dir
     )
 
-    return JSONResponse(
-        {
-            "draw": draw,
-            "recordsTotal": products_data["total"],
-            "recordsFiltered": products_data["total_filtered"],
-            "data": products_data["products"],
-        }
-    )
+    return JSONResponse({
+        "draw": draw,
+        "recordsTotal": products_data["total"],
+        "recordsFiltered": products_data["total_filtered"],
+        "data": products_data["products"],
+    })
+

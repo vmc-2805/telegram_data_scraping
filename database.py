@@ -25,8 +25,11 @@ connect_args = {
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True,
-    pool_recycle=3600
+    pool_pre_ping=True,     
+    pool_recycle=3600,      
+    pool_timeout=30,       
+    pool_size=10,           
+    max_overflow=5         
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

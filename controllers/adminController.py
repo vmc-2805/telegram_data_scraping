@@ -170,7 +170,12 @@ class UserLogin:
 
     @staticmethod
     def SameProductsData(
-        db: Session, page: int = 1, per_page: int = 50, search_value: str = ""
+        db: Session,
+        page=1,
+        per_page=50,
+        search_value="",
+        order_column=1,
+        order_dir="asc",
     ):
         duplicate_names_query = (
             db.query(Product.product_name)
@@ -232,8 +237,18 @@ class UserLogin:
         else:
             filtered_products = unique_products
 
-        total_records = len(unique_products)
-        total_filtered = len(filtered_products)
+        column_map = {
+            1: "product_name",
+            2: "product_price",
+            3: "channel_name",
+            4: "product_description",
+            5: "source_type",
+            6: "date",
+        }
+        sort_attr = column_map.get(order_column, "product_name")
+        reverse = order_dir == "desc"
+        filtered_products.sort(key=lambda x: getattr(x, sort_attr, ""), reverse=reverse)
+
         start = (page - 1) * per_page
         end = start + per_page
         paged_products = filtered_products[start:end]
@@ -242,7 +257,7 @@ class UserLogin:
             {
                 "product_name": p.product_name,
                 "product_description": p.product_description,
-                "product_price": p.product_price,
+                "product_price": float(p.product_price) if p.product_price else 0.0,
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
                 "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "N/A",
@@ -253,16 +268,21 @@ class UserLogin:
 
         return {
             "products": result,
-            "total": total_records,
-            "total_filtered": total_filtered,
+            "total": len(unique_products),
+            "total_filtered": len(filtered_products),
             "page": page,
             "per_page": per_page,
-            "total_pages": (total_filtered + per_page - 1) // per_page,
+            "total_pages": (len(filtered_products) + per_page - 1) // per_page,
         }
 
     @staticmethod
     def low_price_products_data(
-        db: Session, page: int = 1, per_page: int = 50, search_value: str = ""
+        db: Session,
+        page=1,
+        per_page=50,
+        search_value="",
+        order_column=1,
+        order_dir="asc",
     ):
 
         duplicate_names_query = (
@@ -334,15 +354,29 @@ class UserLogin:
         if search_value:
             search = search_value.lower()
             lowest_price_products = [
-                p
-                for p in lowest_price_products
+                p for p in lowest_price_products
                 if search in (p.product_name or "").lower()
                 or search in (p.product_description or "").lower()
                 or search in (p.channel_name or "").lower()
                 or search in (p.source_type or "").lower()
             ]
 
-        total_records = len(lowest_price_products)
+        column_map = {
+            1: "product_name",
+            2: "product_price",
+            3: "channel_name",
+            4: "product_description",
+            5: "source_type",
+            6: "created_at"  
+        }
+        sort_attr = column_map.get(order_column, "product_name")
+        reverse = order_dir == "desc"
+
+        if sort_attr == "created_at":
+            lowest_price_products.sort(key=lambda x: x.created_at or datetime.min, reverse=reverse)
+        else:
+            lowest_price_products.sort(key=lambda x: getattr(x, sort_attr) or "", reverse=reverse)
+
         start = (page - 1) * per_page
         end = start + per_page
         paged_products = lowest_price_products[start:end]
@@ -351,25 +385,31 @@ class UserLogin:
             {
                 "product_name": p.product_name,
                 "product_description": p.product_description,
-                "product_price": p.product_price,
+                "product_price": float(p.product_price) if p.product_price else 0.0,
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
                 "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
-                "media_url": p.media_url,
+                "media_url": p.media_url
             }
             for p in paged_products
         ]
 
         return {
             "products": result,
-            "total": total_records,
-            "total_filtered": total_records,
+            "total": len(lowest_price_products),
+            "total_filtered": len(lowest_price_products)
         }
 
     @staticmethod
     def zero_price_products_data(
-        db: Session, page: int = 1, per_page: int = 50, search_value: str = ""
+        db: Session,
+        page: int = 1,
+        per_page: int = 50,
+        search_value: str = "",
+        order_column: int = 1,
+        order_dir: str = "asc",
     ):
+
         query = db.query(Product).filter(Product.product_price == 0)
 
         if search_value:
@@ -381,8 +421,23 @@ class UserLogin:
                 )
             )
 
-        total = query.count()
+        # Map column index to actual column
+        column_map = {
+            1: Product.product_name,
+            2: Product.product_price,
+            3: Product.channel_name,
+            4: Product.product_description,
+            5: Product.source_type,
+            6: Product.created_at,
+        }
 
+        order_column_attr = column_map.get(order_column, Product.product_name)
+        if order_dir == "desc":
+            query = query.order_by(order_column_attr.desc())
+        else:
+            query = query.order_by(order_column_attr.asc())
+
+        total = query.count()
         offset = (page - 1) * per_page
         products = query.offset(offset).limit(per_page).all()
 
@@ -392,7 +447,9 @@ class UserLogin:
                 {
                     "product_name": p.product_name,
                     "product_description": p.product_description,
-                    "product_price": p.product_price,
+                    "product_price": (
+                        float(p.product_price) if p.product_price is not None else 0.0
+                    ),
                     "channel_name": p.channel_name,
                     "source_type": p.source_type,
                     "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
@@ -400,8 +457,4 @@ class UserLogin:
                 }
             )
 
-        return {
-            "total": total,
-            "total_filtered": total,
-            "products": result,
-        }
+        return {"total": total, "total_filtered": total, "products": result}
