@@ -2,12 +2,29 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from urllib.parse import quote_plus
+from dotenv import load_dotenv
+import os
 
-password = quote_plus("Root@2111")
-DATABASE_URL = f"mysql+pymysql://root:{password}@192.168.1.12/telegram_products"
+load_dotenv()
+
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = quote_plus(os.getenv("DB_PASSWORD"))
+DB_NAME = os.getenv("DB_NAME")
+DB_SSL_CA = os.getenv("DB_SSL_CA")
+
+DATABASE_URL = (
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+connect_args = {
+    "ssl": {"ca": DB_SSL_CA}
+}
 
 engine = create_engine(
     DATABASE_URL,
+    connect_args=connect_args,
     pool_pre_ping=True,
     pool_recycle=3600
 )

@@ -47,7 +47,7 @@ $(document).ready(function () {
     language: {
       infoFiltered: "",
       info: "Showing _START_ to _END_ of _TOTAL_ entries",
-      processing: "Loading data...",
+      processing: "Processing...",
     },
   });
 });
