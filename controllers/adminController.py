@@ -10,9 +10,12 @@ import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from models.product import Product
-from sqlalchemy import func, or_
+from sqlalchemy import asc, desc, or_, func
 from PIL import Image
 import imagehash
+from models.SameProduct import SameProduct
+from models.UniqueProduct import UniqueProduct
+
 
 
 load_dotenv()
@@ -171,87 +174,44 @@ class UserLogin:
     @staticmethod
     def SameProductsData(
         db: Session,
-        page=1,
-        per_page=50,
-        search_value="",
-        order_column=1,
-        order_dir="asc",
+        page: int = 1,
+        per_page: int = 50,
+        search_value: str = "",
+        order_column: int = 1,
+        order_dir: str = "asc",
     ):
-        duplicate_names_query = (
-            db.query(Product.product_name)
-            .group_by(Product.product_name)
-            .having(func.count(Product.product_name) > 1)
-            .all()
-        )
-        duplicate_names = [n[0] for n in duplicate_names_query]
-
-        same_name_products = (
-            db.query(Product).filter(Product.product_name.in_(duplicate_names)).all()
-        )
-
-        products_with_images = (
-            db.query(Product).filter(Product.media_url.isnot(None)).all()
-        )
-        image_hash_map = {}
-        duplicate_image_ids = set()
-
-        for p in products_with_images:
-            if not p.media_url or p.media_url.strip() == "":
-                continue
-            image_path = os.path.normpath(p.media_url)
-            if not os.path.isfile(image_path):
-                continue
-            try:
-                img = Image.open(image_path).convert("L")
-                img_hash = imagehash.phash(img)
-                if img_hash in image_hash_map:
-                    duplicate_image_ids.add(image_hash_map[img_hash])
-                    duplicate_image_ids.add(p.id)
-                else:
-                    image_hash_map[img_hash] = p.id
-            except Exception:
-                continue
-
-        same_image_products = (
-            db.query(Product).filter(Product.id.in_(duplicate_image_ids)).all()
-        )
-
-        all_products = same_name_products + same_image_products
-        seen_names = set()
-        unique_products = []
-        for p in all_products:
-            normalized_name = p.product_name.strip().lower()
-            if normalized_name not in seen_names:
-                seen_names.add(normalized_name)
-                unique_products.append(p)
-
+        query = db.query(SameProduct)
         if search_value:
-            filtered_products = [
-                p
-                for p in unique_products
-                if search_value.lower() in (p.product_name or "").lower()
-                or search_value.lower() in (p.product_description or "").lower()
-                or search_value.lower() in (p.channel_name or "").lower()
-                or search_value.lower() in (p.source_type or "").lower()
-            ]
-        else:
-            filtered_products = unique_products
+            search = f"%{search_value}%"
+            query = query.filter(
+                or_(
+                    SameProduct.product_name.ilike(search),
+                    SameProduct.product_description.ilike(search),
+                    SameProduct.channel_name.ilike(search),
+                    SameProduct.source_type.ilike(search),
+                )
+            )
 
         column_map = {
-            1: "product_name",
-            2: "product_price",
-            3: "channel_name",
-            4: "product_description",
-            5: "source_type",
-            6: "date",
+            1: SameProduct.product_name,
+            2: SameProduct.product_price,
+            3: SameProduct.channel_name,
+            4: SameProduct.product_description,
+            5: SameProduct.source_type,
+            6: SameProduct.created_at,
         }
-        sort_attr = column_map.get(order_column, "product_name")
-        reverse = order_dir == "desc"
-        filtered_products.sort(key=lambda x: getattr(x, sort_attr, ""), reverse=reverse)
 
-        start = (page - 1) * per_page
-        end = start + per_page
-        paged_products = filtered_products[start:end]
+        sort_column = column_map.get(order_column, SameProduct.product_name)
+        if order_dir == "desc":
+            query = query.order_by(sort_column.desc())
+        else:
+            query = query.order_by(sort_column.asc())
+
+        total_records = db.query(SameProduct).count()
+        total_filtered = query.count()
+
+        offset = (page - 1) * per_page
+        paged_products = query.offset(offset).limit(per_page).all()
 
         result = [
             {
@@ -260,7 +220,7 @@ class UserLogin:
                 "product_price": float(p.product_price) if p.product_price else 0.0,
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
-                "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "N/A",
+                "date": str(p.created_at) if p.created_at else "N/A",
                 "media_url": p.media_url,
             }
             for p in paged_products
@@ -268,11 +228,11 @@ class UserLogin:
 
         return {
             "products": result,
-            "total": len(unique_products),
-            "total_filtered": len(filtered_products),
+            "total": total_records,
+            "total_filtered": total_filtered,
             "page": page,
             "per_page": per_page,
-            "total_pages": (len(filtered_products) + per_page - 1) // per_page,
+            "total_pages": (total_filtered + per_page - 1) // per_page,
         }
 
     @staticmethod
@@ -354,7 +314,8 @@ class UserLogin:
         if search_value:
             search = search_value.lower()
             lowest_price_products = [
-                p for p in lowest_price_products
+                p
+                for p in lowest_price_products
                 if search in (p.product_name or "").lower()
                 or search in (p.product_description or "").lower()
                 or search in (p.channel_name or "").lower()
@@ -367,15 +328,19 @@ class UserLogin:
             3: "channel_name",
             4: "product_description",
             5: "source_type",
-            6: "created_at"  
+            6: "created_at",
         }
         sort_attr = column_map.get(order_column, "product_name")
         reverse = order_dir == "desc"
 
         if sort_attr == "created_at":
-            lowest_price_products.sort(key=lambda x: x.created_at or datetime.min, reverse=reverse)
+            lowest_price_products.sort(
+                key=lambda x: x.created_at or datetime.min, reverse=reverse
+            )
         else:
-            lowest_price_products.sort(key=lambda x: getattr(x, sort_attr) or "", reverse=reverse)
+            lowest_price_products.sort(
+                key=lambda x: getattr(x, sort_attr) or "", reverse=reverse
+            )
 
         start = (page - 1) * per_page
         end = start + per_page
@@ -389,7 +354,7 @@ class UserLogin:
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
                 "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
-                "media_url": p.media_url
+                "media_url": p.media_url,
             }
             for p in paged_products
         ]
@@ -397,7 +362,7 @@ class UserLogin:
         return {
             "products": result,
             "total": len(lowest_price_products),
-            "total_filtered": len(lowest_price_products)
+            "total_filtered": len(lowest_price_products),
         }
 
     @staticmethod
@@ -458,3 +423,63 @@ class UserLogin:
             )
 
         return {"total": total, "total_filtered": total, "products": result}
+    
+    @staticmethod
+    def unique_products_data(
+        db: Session,
+        page: int = 1,
+        per_page: int = 50,
+        search_value: str = "",
+        order_column: int = 1,
+        order_dir: str = "asc",
+    ):
+        column_map = {
+            1: UniqueProduct.product_name,
+            2: UniqueProduct.product_price,
+            3: UniqueProduct.channel_name,
+            4: UniqueProduct.product_description,
+            5: UniqueProduct.source_type,
+            6: UniqueProduct.created_at,
+        }
+
+        sort_column = column_map.get(order_column, UniqueProduct.product_name)
+        sort_order = asc if order_dir == "asc" else desc
+
+        query = db.query(UniqueProduct)
+
+        if search_value:
+            search = f"%{search_value}%"
+            query = query.filter(
+                or_(
+                    UniqueProduct.product_name.ilike(search),
+                    UniqueProduct.product_description.ilike(search),
+                    UniqueProduct.channel_name.ilike(search),
+                    UniqueProduct.source_type.ilike(search),
+                )
+            )
+
+        total_filtered = query.count()
+        total = db.query(UniqueProduct).count()
+
+        query = query.order_by(sort_order(sort_column))
+
+        offset = (page - 1) * per_page
+        products = query.offset(offset).limit(per_page).all()
+
+        result = []
+        for p in products:
+            result.append({
+                "product_name": p.product_name,
+                "product_description": p.product_description,
+                "product_price": float(p.product_price) if p.product_price else 0.0,
+                "channel_name": p.channel_name,
+                "source_type": p.source_type,
+                "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
+                "media_url": p.media_url,
+            })
+
+        return {
+            "products": result,
+            "total": total,
+            "total_filtered": total_filtered,
+        }

@@ -294,3 +294,54 @@ async def zero_price_products_data(request: Request, db: Session = Depends(get_d
         "data": products_data["products"],
     })
 
+
+@router.get("/unique_products")
+def unique_products(request: Request):
+    token = request.cookies.get("access_token")
+    if not token:
+        return RedirectResponse(url="/login")
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+
+        db = next(get_db())
+        user = db.query(Admin).filter(Admin.email == email).first()
+        if user:
+            user_name = user.name
+        else:
+            user_name = email
+
+    except JWTError:
+        return RedirectResponse(url="/login")
+
+    return templates.TemplateResponse(
+        "unique_products.html",
+        {"request": request, "user_name": user_name},
+    )
+
+@router.post("/unique_products_data")
+async def unique_products_data(request: Request, db: Session = Depends(get_db)):
+    form = await request.form()
+    page = int(form.get("page", 1))
+    per_page = int(form.get("per_page", 50))
+    draw = int(form.get("draw", 1))
+    search_value = form.get("search_value", "")
+    order_column = int(form.get("order_column", 1))
+    order_dir = form.get("order_dir", "asc")
+
+    products_data = UserLogin.unique_products_data(
+        db,
+        page=page,
+        per_page=per_page,
+        search_value=search_value,
+        order_column=order_column,
+        order_dir=order_dir
+    )
+
+    return JSONResponse({
+        "draw": draw,
+        "recordsTotal": products_data["total"],
+        "recordsFiltered": products_data["total_filtered"],
+        "data": products_data["products"],
+    })
