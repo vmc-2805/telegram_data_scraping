@@ -38,7 +38,7 @@ def read_root(request: Request):
     token = request.cookies.get("access_token")
     if not token:
         return RedirectResponse(url="/login")
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
@@ -58,6 +58,7 @@ def read_root(request: Request):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
 
 @router.get("/dashboard_counts")
 def dashboard_counts(db: Session = Depends(get_db)):
@@ -85,9 +86,6 @@ def dashboard_counts(db: Session = Depends(get_db)):
         "total_channels": total_channels,
         "low_price_products": total_low_price,
     }
-
-
-
 
 
 @router.get("/login")
@@ -135,7 +133,12 @@ async def all_product(request: Request, db: Session = Depends(get_db)):
     draw = int(form.get("draw", 1))
     search_value = form.get("search_value", "")
 
-    data = UserLogin.all_product(db, page, per_page, search_value)
+    order_column_index = int(form.get("order_column", 1))  
+    order_dir = form.get("order_dir", "asc") 
+
+    data = UserLogin.all_product(
+        db, page, per_page, search_value, order_column_index, order_dir
+    )
 
     return JSONResponse(
         {
@@ -239,6 +242,7 @@ async def low_price_products_data(request: Request, db: Session = Depends(get_db
         }
     )
 
+
 @router.get("/zero_price_products")
 def zero_price_products(request: Request):
     token = request.cookies.get("access_token")
@@ -263,7 +267,8 @@ def zero_price_products(request: Request):
         "zero_price_products.html",
         {"request": request, "user_name": user_name},
     )
-    
+
+
 @router.post("/zero_price_products_data")
 async def zero_price_products_data(request: Request, db: Session = Depends(get_db)):
     form = await request.form()

@@ -18,3 +18,16 @@
 #all_products_table_wrapper > .row {
   align-items: end;
 }
+
+#low_price_products_table_wrapper > .row {
+  align-items: end;
+}
+
+#same_products_table_wrapper > .row {
+  align-items: end;
+}
+
+#zero_price_products_table_wrapper > .row {
+  align-items: end;
+}
+

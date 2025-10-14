@@ -92,8 +92,34 @@ class UserLogin:
 
     @staticmethod
     def all_product(
-        db: Session, page: int = 1, per_page: int = 50, search_value: str = ""
+        db: Session,
+        page: int = 1,
+        per_page: int = 50,
+        search_value: str = "",
+        order_column: int = None,
+        order_dir: str = None,
     ):
+        column_map = [
+            "media_url",
+            "product_name",
+            "product_description",
+            "product_price",
+            "channel_name",
+            "source_type",
+            "created_at",
+            "id",
+        ]
+
+        if order_column is None or order_dir is None:
+            order_field = "id"
+            order_dir = "desc"
+        else:
+            order_field = (
+                column_map[order_column]
+                if 0 <= order_column < len(column_map)
+                else "id"
+            )
+
         query = db.query(Product).filter(
             Product.product_name.isnot(None), Product.product_name != ""
         )
@@ -108,20 +134,27 @@ class UserLogin:
                 )
             )
 
+        if order_dir.lower() == "asc":
+            query = query.order_by(getattr(Product, order_field).asc())
+        else:
+            query = query.order_by(getattr(Product, order_field).desc())
+
         total = db.query(Product).count()
         total_filtered = query.count()
-
         products = query.offset((page - 1) * per_page).limit(per_page).all()
 
         result = [
             {
                 "product_name": p.product_name,
                 "product_description": p.product_description,
-                "product_price": p.product_price,
+                "product_price": (
+                    float(p.product_price) if p.product_price is not None else 0.0
+                ),
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
                 "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
                 "media_url": p.media_url,
+                "id": p.id,
             }
             for p in products
         ]
@@ -205,7 +238,6 @@ class UserLogin:
         end = start + per_page
         paged_products = filtered_products[start:end]
 
-             
         result = [
             {
                 "product_name": p.product_name,
