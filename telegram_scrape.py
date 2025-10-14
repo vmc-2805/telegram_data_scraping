@@ -102,7 +102,7 @@ class DatabaseHandler:
             print(f"❌ Error creating table: {e}")
 
     def insert_product(self, product: dict) -> bool:
-        """Insert or update a product record with proper DECIMAL price formatting."""
+        """Insert or update a product record with accurate DECIMAL price parsing."""
         if not self.connection:
             return False
 
@@ -111,10 +111,14 @@ class DatabaseHandler:
             print("🚫 Ignored spammy product message.")
             return False
 
-        price_raw = str(product.get("product_price", "")).strip()
-        match = re.search(r"(\d+(?:\.\d{1,2})?)", price_raw)
-        if match:
-            product_price = round(float(match.group(1)), 2)
+        price_source = f"{product.get('product_name', '')} {product.get('product_description', '')}"
+        price_raw = str(price_source).strip()
+
+        price_match = re.search(
+            r"(?:₹|Rs\.?|INR)\s?(\d+(?:\.\d{1,2})?)", price_raw, re.IGNORECASE)
+
+        if price_match:
+            product_price = round(float(price_match.group(1)), 2)
         else:
             product_price = 0.00
 
