@@ -19,5 +19,5 @@ app.include_router(web_router)
 app.middleware("http")(UserLogin.check_blacklist)
 
 if __name__ == "__main__":
-    uvicorn.run("index:app", host="192.168.1.28", port=8000, reload=True)
+    uvicorn.run("index:app", host="192.168.1.7", port=8000, reload=True)
 

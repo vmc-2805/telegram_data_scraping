@@ -2,27 +2,51 @@ $(document).ready(function () {
   const $table = $("#all_products_table");
   const $cardBody = $(".card-body");
 
-  const loader = `
-  <div id="table-loader"
-        style="
-          position: fixed;
-          top: 285px;
-          left: 248px;
-          width: calc(100vw - 270px);
-          height: calc(100vh - 285px);
-          background: rgba(255, 255, 255, 0.8);
-          z-index: 9999;
-          display: none;
-          border-radius: 6px;
-        ">
-      <div class="h-100 d-flex align-items-center justify-content-center text-center">
-        <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
-        <div class="px-2">Loading data...</div>
-      </div>
-    </div>
-  `;
+  $table.addClass("table-loader");
 
-  $cardBody.css("position", "relative").append(loader);
+  const shimmerStyle = `
+    <style>
+    .table-loader {
+      visibility: hidden;
+      position: relative;
+    }
+    .table-loader::before {
+      visibility: visible;
+      display: table-caption;
+      content: " ";
+      width: 100%;
+      height: 500px;
+      background-image:
+        linear-gradient(rgba(235, 235, 235, 1) 1px, transparent 0),
+        linear-gradient(90deg, rgba(235, 235, 235, 1) 1px, transparent 0),
+        linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5) 15%, rgba(255, 255, 255, 0) 30%),
+        linear-gradient(rgba(240, 240, 242, 1) 35px, transparent 0);
+      background-repeat: repeat;
+      background-size:
+        1px 35px,
+        calc(100% * 0.1666666666) 1px,
+        30% 100%,
+        2px 70px;
+      background-position:
+        0 0,
+        0 0,
+        0 0,
+        0 0;
+      animation: shine 1.2s infinite linear;
+      border-radius: 6px;
+    }
+    @keyframes shine {
+      to {
+        background-position:
+          0 0,
+          0 0,
+          40% 0,
+          0 0;
+      }
+    }
+    </style>
+  `;
+  $("head").append(shimmerStyle);
 
   if ($.fn.DataTable.isDataTable($table)) {
     $table.DataTable().clear().destroy();
@@ -54,12 +78,12 @@ $(document).ready(function () {
         }
       },
       beforeSend: function () {
-        $table.css("opacity", "0.3");
-        $("#table-loader").fadeIn(200);
+        $table.addClass("table-loader");
+        $table.find("tbody").hide();
       },
       complete: function () {
-        $table.css("opacity", "1");
-        $("#table-loader").fadeOut(200);
+        $table.removeClass("table-loader");
+        $table.find("tbody").fadeIn(300);
       },
       dataSrc: function (json) {
         return json.data;
@@ -89,7 +113,7 @@ $(document).ready(function () {
       { data: "source_type" },
       { data: "date" },
     ],
-    columnDefs: [{ targets: [1, 4, 5], className: "nowrap-column" }],
+    columnDefs: [{ targets: [1, 4, 5, 6], className: "nowrap-column" }],
     language: {
       infoFiltered: "",
       info: "Showing _START_ to _END_ of _TOTAL_ entries",

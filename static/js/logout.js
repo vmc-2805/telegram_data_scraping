@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(data.message);
                 // Remove cookie
                 document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                window.location.href = "/login"; // redirect to login page
+                window.location.href = "/login"; 
             } else {
                 alert("Logout failed");
             }
