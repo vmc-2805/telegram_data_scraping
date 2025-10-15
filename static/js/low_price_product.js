@@ -1,64 +1,96 @@
-$("body").append(`
-  <div id="table-loader"
-       style="
-         position: fixed;
-         top: 285px;
-         left: 248px;
-         width: calc(100vw - 270px);
-         height: calc(100vh - 285px);
-         background: rgba(255, 255, 255, 0.8);
-         z-index: 9999;
-         display: none;
-         border-radius: 6px;
-       ">
-    <div class="h-100 d-flex align-items-center justify-content-center text-center">
-      <div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"></div>
-      <div class="px-2">Loading data...</div>
-    </div>
-  </div>
-`);
 
 $(document).ready(function () {
   if ($.fn.DataTable.isDataTable("#low_price_products_table")) {
     $("#low_price_products_table").DataTable().clear().destroy();
   }
+  const $table = $("#low_price_products_table");
+  const $cardBody = $(".card-body");
 
-  $("#low_price_products_table").DataTable({
+  $table.addClass("table-loader");
+
+  const shimmerStyle = `
+    <style>
+    .table-loader {
+      visibility: hidden;
+      position: relative;
+    }
+    .table-loader::before {
+      visibility: visible;
+      display: table-caption;
+      content: " ";
+      width: 100%;
+      height: 500px;
+      background-image:
+        linear-gradient(rgba(235, 235, 235, 1) 1px, transparent 0),
+        linear-gradient(90deg, rgba(235, 235, 235, 1) 1px, transparent 0),
+        linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5) 15%, rgba(255, 255, 255, 0) 30%),
+        linear-gradient(rgba(240, 240, 242, 1) 35px, transparent 0);
+      background-repeat: repeat;
+      background-size:
+        1px 35px,
+        calc(100% * 0.1666666666) 1px,
+        30% 100%,
+        2px 70px;
+      background-position:
+        0 0,
+        0 0,
+        0 0,
+        0 0;
+      animation: shine 1.2s infinite linear;
+      border-radius: 6px;
+    }
+    @keyframes shine {
+      to {
+        background-position:
+          0 0,
+          0 0,
+          40% 0,
+          0 0;
+      }
+    }
+    </style>
+  `;
+  $("head").append(shimmerStyle);
+
+  if ($.fn.DataTable.isDataTable($table)) {
+    $table.DataTable().clear().destroy();
+  }
+
+  $table.DataTable({
     serverSide: true,
     processing: false,
     responsive: true,
     searching: true,
     pageLength: 50,
     lengthMenu: [50, 100, 500],
-    stateSave: false,
-    deferRender: true,
-    lengthChange: true,
     ordering: true,
+    lengthChange: true,
+    order: [[6, "desc"]],
     ajax: {
       url: "/low_price_products_data",
       type: "POST",
       data: function (d) {
         d.page = Math.floor(d.start / d.length) + 1;
         d.per_page = d.length;
-        d.draw = d.draw;
         d.search_value = d.search.value;
-
         if (d.order && d.order.length > 0) {
           d.order_column = d.order[0].column;
           d.order_dir = d.order[0].dir;
         } else {
-          d.order_column = 1;
+          d.order_column = 6;
           d.order_dir = "desc";
         }
       },
       beforeSend: function () {
-        $("#table-loader").fadeIn(200);
+        $table.addClass("table-loader");
+        $table.find("tbody").hide();
       },
       complete: function () {
-        $("#table-loader").fadeOut(200);
+        $table.removeClass("table-loader");
+        $table.find("tbody").fadeIn(300);
       },
       dataSrc: function (json) {
-        return json.data || [];
+        return json.data;
       },
     },
     columns: [
@@ -75,9 +107,9 @@ $(document).ready(function () {
       { data: "channel_name" },
       {
         data: "product_description",
-        render: function (text, type, row) {
+        render: function (text) {
           if (text && text.length > 20) {
-            return text.substring(0, 20) + "...";
+            return `<span title="${text}">${text.substring(0, 20)}...</span>`;
           }
           return text;
         },
@@ -85,7 +117,7 @@ $(document).ready(function () {
       { data: "source_type" },
       { data: "date" },
     ],
-    columnDefs: [{ targets: [1, 4, 5], className: "nowrap-column" }],
+    columnDefs: [{ targets: [1, 4, 5, 6], className: "nowrap-column" }],
     language: {
       infoFiltered: "",
       info: "Showing _START_ to _END_ of _TOTAL_ entries",
@@ -93,3 +125,4 @@ $(document).ready(function () {
     },
   });
 });
+

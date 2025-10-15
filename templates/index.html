@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container-fluid" id="container-wrapper">
+
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
     <ol class="breadcrumb">
@@ -12,87 +13,21 @@
   </div>
 
   <div class="row mb-3">
-    <!-- Total Products -->
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="row align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1">Total Products</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="total_products">00</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-box-open fa-2x text-primary"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Same Products -->
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1">Same Products</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="same_products">00</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-clone fa-2x text-success"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    {% include 'includes/cards.html' %}
 
-    <!-- Total Channels -->
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1">Total Channels</div>
-              <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800" id="total_channels">00</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-network-wired fa-2x text-info"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Low Price Products -->
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card h-100">
-        <div class="card-body">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-uppercase mb-1">Low Price Products</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800" id="low_price_products">00</div>
-            </div>
-            <div class="col-auto">
-              <i class="fas fa-tags fa-2x text-warning"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- All Products DataTable -->
     <div class="col-lg-12">
       <div class="card shadow mb-4">
         <div class="card-header pb-0 pt-3 d-flex flex-row align-items-center justify-content-between">
           <h5 class="m-0 font-weight-bold text-primary">All Products Data</h5>
         </div>
         <div class="card-body table-responsive pt-0">
-          <table class="table table-hover" id="all_products_table">
+          <table class="table table-hover table-loader" id="all_products_table">
             <thead class="thead-light">
               <tr>
                 <th>Image</th>
                 <th>Name</th>
-                 <th>Price</th>
+                <th>Price</th>
                 <th>Channel</th>
                 <th>Description</th>
                 <th>Source Type</th>
@@ -101,11 +36,15 @@
             </thead>
             <tbody></tbody>
           </table>
+
         </div>
       </div>
     </div>
   </div>
 </div>
+
+
+
 {% endblock %}
 
 {% block scripts %}
