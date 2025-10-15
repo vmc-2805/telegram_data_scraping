@@ -12,9 +12,6 @@ from telethon.tl.types import MessageMediaPhoto
 from telethon.tl.functions.channels import JoinChannelRequest
 from mysql.connector import Error
 
-# ─────────────────────────────────────────────────────────────
-# Load Environment Variables
-# ─────────────────────────────────────────────────────────────
 load_dotenv()
 
 API_ID = int(os.getenv("TELEGRAM_API_ID"))
@@ -28,24 +25,18 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 
 CHANNELS = [
-    "https://t.me/shukansales",
-    "https://t.me/SHOPPOZONE",
-    "https://t.me/DHARMimpex7780",
-    "https://t.me/sevenhorseonlinehub",
-    "https://t.me/TheFlora_536",
-    "https://t.me/ts_mart",
-    "https://t.me/InnovegicMart1",
-    "https://t.me/Cheaperzonee",
-    "https://t.me/nika_enteprise",
-    "https://t.me/basicdeal",
-    "https://t.me/onlineproductbazar"
+    "https://t.me/InnovegicMart",
+    "https://t.me/kenstazon",
+    "https://t.me/vrajenterprise16",
+    "https://t.me/holidaysg",
+    "https://t.me/Onlinemart9",
+    "https://t.me/vedantastore",
+    "https://t.me/valamji",
+    "https://t.me/paramfashion",
+    "https://t.me/metrozone",
 ]
 
 client = OpenAI(api_key=OPENAI_KEY)
-
-# ─────────────────────────────────────────────────────────────
-# Database Handler
-# ─────────────────────────────────────────────────────────────
 
 
 class DatabaseHandler:
@@ -57,10 +48,14 @@ class DatabaseHandler:
         self.create_table()
 
     def connect(self) -> None:
-        """Establish MySQL connection."""
         try:
-            if self.connection and self.connection.is_connected():
-                return
+            if self.connection:
+                try:
+                    self.connection.ping(reconnect=True, attempts=3, delay=2)
+                    return
+                except Exception:
+                    pass
+
             self.connection = mysql.connector.connect(
                 host=DB_HOST,
                 port=DB_PORT,
@@ -75,7 +70,6 @@ class DatabaseHandler:
             self.connection = None
 
     def create_table(self) -> None:
-        """Create products table if it doesn't exist, optimized for DECIMAL price storage."""
         if not self.connection:
             return
 
@@ -102,12 +96,21 @@ class DatabaseHandler:
             print(f"❌ Error creating table: {e}")
 
     def insert_product(self, product: dict) -> bool:
-        """Insert or update a product record with accurate DECIMAL price parsing."""
-        if not self.connection:
+        try:
+            if not self.connection or not self.connection.is_connected():
+                print("🔄 MySQL connection lost — reconnecting...")
+                self.connect()
+        except Exception as e:
+            print(f"⚠️ MySQL connection check failed ({e}), reconnecting...")
+            self.connect()
+
+        if not self.connection or not self.connection.is_connected():
+            print("❌ MySQL Connection not available even after reconnect.")
             return False
 
-        if is_spammy_text(product.get("product_name", "")) or \
-                is_spammy_text(product.get("product_description", "")):
+        if is_spammy_text(product.get("product_name", "")) or is_spammy_text(
+            product.get("product_description", "")
+        ):
             print("🚫 Ignored spammy product message.")
             return False
 
@@ -115,12 +118,16 @@ class DatabaseHandler:
         price_raw = str(price_source).strip()
 
         price_match = re.search(
-            r"(?:₹|Rs\.?|INR)\s?(\d+(?:\.\d{1,2})?)", price_raw, re.IGNORECASE)
+            r"(?:₹|Rs\.?|INR)\s?(\d+(?:\.\d{1,2})?)", price_raw, re.IGNORECASE
+        )
 
         if price_match:
             product_price = round(float(price_match.group(1)), 2)
         else:
-            product_price = 0.00
+            try:
+                product_price = round(float(product.get("product_price", 0)), 2)
+            except (ValueError, TypeError):
+                product_price = 0.00
 
         query = """
         INSERT INTO products (
@@ -137,34 +144,61 @@ class DatabaseHandler:
 
         try:
             with self.connection.cursor() as cursor:
-                cursor.execute(query, (
-                    product.get("product_name", "").strip(),
-                    product.get("product_description", "").strip(),
-                    product_price,
-                    product.get("channel_name", "").strip(),
-                    product.get("message_id", 0),
-                    product.get("timestamp", datetime.now(timezone.utc)),
-                    product.get("media_url", "").strip(),
-                    product.get("source_type", "telegram").strip(),
-                ))
+                cursor.execute(
+                    query,
+                    (
+                        product.get("product_name", "").strip(),
+                        product.get("product_description", "").strip(),
+                        product_price,
+                        product.get("channel_name", "").strip(),
+                        product.get("message_id", 0),
+                        product.get("timestamp", datetime.now(timezone.utc)),
+                        product.get("media_url", "").strip(),
+                        product.get("source_type", "telegram").strip(),
+                    ),
+                )
+            self.connection.commit()
+            print(
+                f"✅ Product inserted successfully: {product.get('product_name', '')} | Price: {product_price}"
+            )
             return True
-        except Error as e:
-            print(f"❌ Error inserting product: {e}")
-            return False
 
-# ─────────────────────────────────────────────────────────────
-# Spam Detection
-# ─────────────────────────────────────────────────────────────
+        except mysql.connector.Error as e:
+            if e.errno in (2006, 2013):
+                print(
+                    f"⚠️ MySQL connection dropped during insert ({e.errno}). Retrying..."
+                )
+                self.connect()
+                return self.insert_product(product)
+            else:
+                print(f"❌ Error inserting product: {e}")
+                try:
+                    self.connection.rollback()
+                except Exception:
+                    pass
+                return False
+
+        except Exception as e:
+            print(f"❌ Unexpected error during insert: {e}")
+            return False
 
 
 def is_spammy_text(text: str, product_price: str = "0") -> bool:
-    """Detect spammy or irrelevant text."""
     text = (text or "").strip()
     if not text:
         return False
 
-    spam_keywords = {"join", "order now", "buy now", "click here", "telegram",
-                     "whatsapp", "offer", "catalogue", "link"}
+    spam_keywords = {
+        "join",
+        "order now",
+        "buy now",
+        "click here",
+        "telegram",
+        "whatsapp",
+        "offer",
+        "catalogue",
+        "link",
+    }
     if any(kw in text.lower() for kw in spam_keywords):
         return True
 
@@ -176,22 +210,22 @@ def is_spammy_text(text: str, product_price: str = "0") -> bool:
     return len(text) < 3 and alnum_ratio < 0.5 or special_ratio > 0.7
 
 
-# ─────────────────────────────────────────────────────────────
-# Text Cleaning Utilities
-# ─────────────────────────────────────────────────────────────
 def clean_description(lines: list[str]) -> str:
-    """Clean and extract meaningful description lines."""
     skip_patterns = [
-        r"^\(?[A-Z]+\)?$", r"Available✅+", r"In Stock", r"Out of Stock",
-        r"❌.*?❌", r"^\s*[✅🔥💥]+\s*$", r"^\(?[A-Za-z]{1,2}\)?$"
+        r"^\(?[A-Z]+\)?$",
+        r"Available✅+",
+        r"In Stock",
+        r"Out of Stock",
+        r"❌.*?❌",
+        r"^\s*[✅🔥💥]+\s*$",
+        r"^\(?[A-Za-z]{1,2}\)?$",
     ]
 
     valid_lines = []
     for line in map(str.strip, lines):
         if not line:
             continue
-        line = re.sub(r"\bSZ[-\s]?\d{1,6}\b", "",
-                      line, flags=re.IGNORECASE).strip()
+        line = re.sub(r"\bSZ[-\s]?\d{1,6}\b", "", line, flags=re.IGNORECASE).strip()
         if not line or any(re.match(pat, line, re.IGNORECASE) for pat in skip_patterns):
             continue
         if len(line.split()) >= 2:
@@ -200,11 +234,14 @@ def clean_description(lines: list[str]) -> str:
 
 
 def clean_message(text: str) -> str:
-    """Remove unwanted content like links, contact info, and noise."""
     text = re.sub(r"https?://\S+|\d{6,12}", "", text)
     for pat in [
-        r"✅Avalaible", r"Avalaible", r"Available", r"✅ single price",
-        r"🟢.*?PRICE.*?🟢", r"Join To (Whatsapp|Telegram) Community.*"
+        r"✅Avalaible",
+        r"Avalaible",
+        r"Available",
+        r"✅ single price",
+        r"🟢.*?PRICE.*?🟢",
+        r"Join To (Whatsapp|Telegram) Community.*",
     ]:
         text = re.sub(pat, "", text, flags=re.IGNORECASE)
     return re.sub(r"\n+", "\n", text).strip()
@@ -216,7 +253,7 @@ def extract_price(text: str) -> str:
 
     patterns = [
         r"(?i)(?:₹|rs\.?|inr|price|rate)\s*[:\-]?\s*(\d+(?:\.\d{1,2})?)",
-        r"(?i)(\d+(?:\.\d{1,2})?)\s*(₹|rs\.?|inr|price|rate)"
+        r"(?i)(\d+(?:\.\d{1,2})?)\s*(₹|rs\.?|inr|price|rate)",
     ]
     for pattern in patterns:
         match = re.search(pattern, clean_text)
@@ -225,51 +262,75 @@ def extract_price(text: str) -> str:
 
     clean_text = re.sub(r"\+?\b91\d{7,10}\b", "", clean_text)
     clean_text = re.sub(
-        r"\b\d+\s*(cm|pcs|piece|pair|inch|set|kg|g|ml|ltr|litre|size)\b", "", clean_text, flags=re.I)
-    candidates = [num for num in re.findall(
-        r"\b\d+(?:\.\d{1,2})?\b", clean_text) if 1 < float(num) < 9999]
+        r"\b\d+\s*(cm|pcs|piece|pair|inch|set|kg|g|ml|ltr|litre|size)\b",
+        "",
+        clean_text,
+        flags=re.I,
+    )
+    candidates = [
+        num
+        for num in re.findall(r"\b\d+(?:\.\d{1,2})?\b", clean_text)
+        if 1 < float(num) < 9999
+    ]
 
     return candidates[-1] if candidates else "0"
 
 
-# ─────────────────────────────────────────────────────────────
-# Message Analysis
-# ─────────────────────────────────────────────────────────────
 def analyze_message(text: str, channel_name: str) -> dict:
-    """Analyze and extract structured product information from message."""
     text = clean_message(text)
     if not text:
-        return {"product_name": "", "product_description": "", "product_price": "0", "channel_name": channel_name.lower()}
+        return {
+            "product_name": "",
+            "product_description": "",
+            "product_price": "0",
+            "channel_name": channel_name.lower(),
+        }
 
     product_price = extract_price(text)
     if not re.fullmatch(r"\d+(?:\.\d{1,2})?", product_price):
         product_price = "0"
 
     code_match = re.search(r"\b(SZ[-\s]?\d{1,6}|SIZE\s*\d+)\b", text, re.I)
-    product_code = (code_match.group(1).strip().upper().replace(
-        " ", "-")) if code_match else ""
+    product_code = (
+        (code_match.group(1).strip().upper().replace(" ", "-")) if code_match else ""
+    )
 
-    cleaned_text = re.sub(
-        r"\bSZ[-\s]?\d{1,6}\b|\bSIZE\s*\d+\b", "", text, flags=re.I)
+    cleaned_text = re.sub(r"\bSZ[-\s]?\d{1,6}\b|\bSIZE\s*\d+\b", "", text, flags=re.I)
     if product_price != "0":
-        cleaned_text = re.sub(r"\b{}\b".format(
-            re.escape(product_price)), "", cleaned_text)
+        cleaned_text = re.sub(
+            r"\b{}\b".format(re.escape(product_price)), "", cleaned_text
+        )
 
     spam_phrases = [
-        "SINGLE PRICE", "MAKE THE ORDER", "✅", "Contact", "WhatsApp", "Join", "Telegram",
-        "Click here", "Catalogue", "Order Now", "Shop Now", "Limited Stock", "Offer"
+        "SINGLE PRICE",
+        "MAKE THE ORDER",
+        "✅",
+        "Contact",
+        "WhatsApp",
+        "Join",
+        "Telegram",
+        "Click here",
+        "Catalogue",
+        "Order Now",
+        "Shop Now",
+        "Limited Stock",
+        "Offer",
     ]
     for phrase in spam_phrases:
         cleaned_text = re.sub(re.escape(phrase), "", cleaned_text, flags=re.I)
     cleaned_text = re.sub(r"\n+", "\n", cleaned_text).strip()
 
     if is_spammy_text(cleaned_text, product_price):
-        return {"product_name": "", "product_description": "", "product_price": "0", "channel_name": channel_name.lower()}
+        return {
+            "product_name": "",
+            "product_description": "",
+            "product_price": "0",
+            "channel_name": channel_name.lower(),
+        }
 
     lines = [l.strip() for l in cleaned_text.splitlines() if l.strip()]
     product_name = lines[0] if lines else ""
-    product_description = clean_description(
-        lines[1:]) if len(lines) > 1 else ""
+    product_description = clean_description(lines[1:]) if len(lines) > 1 else ""
 
     prompt = f"""
         Extract product_name and product_description from the Telegram message.
@@ -292,7 +353,8 @@ def analyze_message(text: str, channel_name: str) -> dict:
         parsed = json.loads(re.search(r"\{.*\}", content, re.S).group())
         product_name = parsed.get("product_name", product_name).strip()
         product_description = parsed.get(
-            "product_description", product_description).strip()
+            "product_description", product_description
+        ).strip()
     except Exception as e:
         print(f"❌ OpenAI error: {e}")
 
@@ -302,7 +364,8 @@ def analyze_message(text: str, channel_name: str) -> dict:
             product_description = ""
         else:
             product_description = re.sub(
-                re.escape(product_code), "", product_description, flags=re.I).strip()
+                re.escape(product_code), "", product_description, flags=re.I
+            ).strip()
             product_name = f"{product_name} {product_code}".strip()
 
     product_name = re.sub(r"\s{2,}", " ", product_name).strip()
@@ -311,37 +374,35 @@ def analyze_message(text: str, channel_name: str) -> dict:
     return {
         "product_name": product_name,
         "product_description": product_description,
-        "product_price": re.search(r"\d+", product_price or "0").group() if re.search(r"\d+",
-                                                                                      product_price or "0") else "0",
+        "product_price": (
+            re.search(r"\d+", product_price or "0").group()
+            if re.search(r"\d+", product_price or "0")
+            else "0"
+        ),
         "channel_name": channel_name.lower(),
     }
 
 
-# ─────────────────────────────────────────────────────────────
-# Utility Functions
-# ─────────────────────────────────────────────────────────────
 def channel_username_from_url(url: str) -> str:
-    """Extract Telegram username from channel URL."""
     return url.rstrip("/").split("/")[-1]
 
 
-# ─────────────────────────────────────────────────────────────
-# Telegram Scraping Logic
-# ─────────────────────────────────────────────────────────────
-async def scrape_past_week(tg_client: TelegramClient, db: DatabaseHandler, days: int = 7) -> None:
-    """Scrape messages from the past week."""
+async def scrape_past_week(
+    tg_client: TelegramClient, db: DatabaseHandler, days: int = 7
+) -> None:
     since_date = datetime.now(timezone.utc) - timedelta(days=days)
     os.makedirs("downloads", exist_ok=True)
 
     for channel in CHANNELS:
         username = channel_username_from_url(channel)
-        print(
-            f"\n🔎 Backfilling channel: {username} since {since_date.isoformat()}")
+        print(f"\n🔎 Backfilling channel: {username} since {since_date.isoformat()}")
 
         async for msg in tg_client.iter_messages(username, limit=None):
             if not msg.date or msg.date < since_date:
                 break
-            if not (msg.message or "").strip() or (msg.media and not isinstance(msg.media, MessageMediaPhoto)):
+            if not (msg.message or "").strip() or (
+                msg.media and not isinstance(msg.media, MessageMediaPhoto)
+            ):
                 continue
 
             extracted = analyze_message(msg.message, username)
@@ -358,23 +419,16 @@ async def scrape_past_week(tg_client: TelegramClient, db: DatabaseHandler, days:
 
             if isinstance(msg.media, MessageMediaPhoto):
                 try:
-                    file_path = os.path.join(
-                        "downloads", f"photo_{msg.id}.jpg")
+                    file_path = os.path.join("downloads", f"photo_{msg.id}.jpg")
                     await msg.download_media(file=file_path)
                     product["media_url"] = file_path
                 except Exception as e:
                     print(f"❌ Error downloading media: {e}")
 
             db.insert_product(product)
-            print(
-                f"✅ Inserted/Updated: {product['channel_name']} | {product['product_name']} | ₹{product['product_price']}")
 
 
-# ─────────────────────────────────────────────────────────────
-# Real-Time Message Handler
-# ─────────────────────────────────────────────────────────────
 def register_realtime_handlers(tg_client: TelegramClient, db: DatabaseHandler) -> None:
-    """Register real-time message listeners for Telegram channels."""
     usernames = [channel_username_from_url(c) for c in CHANNELS]
 
     @tg_client.on(events.NewMessage(chats=usernames))
@@ -382,15 +436,20 @@ def register_realtime_handlers(tg_client: TelegramClient, db: DatabaseHandler) -
         try:
             message = event.message
             chan = getattr(event.chat, "username", None) or getattr(
-                event.chat, "id", "")
-            chan = channel_username_from_url(
-                str(chan)) if chan else usernames[0]
+                event.chat, "id", ""
+            )
+            chan = channel_username_from_url(str(chan)) if chan else usernames[0]
 
-            if not (message.message or "").strip() or (message.media and not isinstance(message.media, MessageMediaPhoto)):
+            if not (message.message or "").strip() or (
+                message.media and not isinstance(message.media, MessageMediaPhoto)
+            ):
                 return
 
             extracted = analyze_message(message.message, chan)
-            if not extracted["product_name"] and (not extracted["product_description"] or extracted["product_price"] == "0"):
+            if not extracted["product_name"] and (
+                not extracted["product_description"]
+                or extracted["product_price"] == "0"
+            ):
                 return
 
             product = {
@@ -403,23 +462,22 @@ def register_realtime_handlers(tg_client: TelegramClient, db: DatabaseHandler) -
 
             if isinstance(message.media, MessageMediaPhoto):
                 try:
-                    product["media_url"] = await message.download_media(file="downloads/")
+                    product["media_url"] = await message.download_media(
+                        file="downloads/"
+                    )
                 except Exception as e:
                     print(f"❌ Error downloading media: {e}")
 
             db.insert_product(product)
             print(
-                f"🟢 New product from {chan}: {product['product_name']} | ₹{product['product_price']}")
+                f"🟢 New product from {chan}: {product['product_name']} | ₹{product['product_price']}"
+            )
 
         except Exception as e:
             print(f"❌ Error in realtime handler: {e}")
 
 
-# ─────────────────────────────────────────────────────────────
-# Main Scraper Entry
-# ─────────────────────────────────────────────────────────────
 async def scrape_channels() -> None:
-    """Main function to join channels, fetch past week, and start monitoring."""
     os.makedirs("downloads", exist_ok=True)
 
     db = DatabaseHandler()
@@ -433,8 +491,7 @@ async def scrape_channels() -> None:
             await tg_client(JoinChannelRequest(username))
             print(f"✅ Joined channel: {username}")
         except Exception as e:
-            print(
-                f"⚠️ Could not join or already joined channel {username}: {e}")
+            print(f"⚠️ Could not join or already joined channel {username}: {e}")
 
     print("\n⏳ Fetching messages from the past 7 days...\n")
     await scrape_past_week(tg_client, db, days=7)
@@ -452,8 +509,5 @@ async def scrape_channels() -> None:
     await tg_client.disconnect()
 
 
-# ─────────────────────────────────────────────────────────────
-# Entry Point
-# ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     asyncio.run(scrape_channels())
