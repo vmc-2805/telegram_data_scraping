@@ -16,10 +16,9 @@ from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
 from database import get_db
 from models.admin import Admin
-from fastapi import Query, Depends
+from fastapi import  Depends
 from fastapi.responses import JSONResponse, HTMLResponse
 from models.product import Product
-from sqlalchemy import func
 
 
 router = APIRouter()

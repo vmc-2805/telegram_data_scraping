@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
   if ($.fn.DataTable.isDataTable("#low_price_products_table")) {
     $("#low_price_products_table").DataTable().clear().destroy();
@@ -97,9 +96,15 @@ $(document).ready(function () {
       {
         data: "media_url",
         render: function (url) {
-          return url
-            ? `<img src="${url.replace(/\\/g, "/")}" width="50" height="40">`
-            : `<span class="text-muted">No Image</span>`;
+          if (!url) return `<span class="text-muted">No Image</span>`;
+          const safeUrl = url.replace(/\\/g, "/");
+          return `
+      <img src="${safeUrl}" 
+          width="80" height="80" 
+           class="img-thumbnail img-preview" 
+           data-img="${safeUrl}" 
+           style="cursor:pointer;">
+    `;
         },
       },
       { data: "product_name" },
@@ -125,4 +130,3 @@ $(document).ready(function () {
     },
   });
 });
-

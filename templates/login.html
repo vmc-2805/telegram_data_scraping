@@ -58,14 +58,30 @@
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
 
+
         .btn-primary {
             border-radius: 10px;
             background: linear-gradient(90deg, #4e73df, #224abe);
             border: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             position: relative;
             overflow: hidden;
+            font-weight: 600;
+        }
+
+        .btn-primary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
 
         .btn-primary:hover {
@@ -138,7 +154,7 @@
                     <h2 class="login-title">Welcome Back 👋</h2>
                     <p class="text-muted">Please login to your account</p>
                 </div>
-
+                <div class="alert-container"></div>
                 <form id="loginForm" class="user">
                     <div class="form-group mb-3">
                         <input type="email" class="form-control" id="email" placeholder="Enter Email Address" required>

@@ -2,29 +2,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const alertContainer = document.querySelector(".alert-container");
 
-  // Password toggle
   const togglePassword = document.querySelector(".toggle-password");
   if (togglePassword) {
     togglePassword.addEventListener("click", () => {
       togglePassword.classList.toggle("fa-eye");
       togglePassword.classList.toggle("fa-eye-slash");
-      const input = document.querySelector(togglePassword.getAttribute("toggle"));
+      const input = document.querySelector(
+        togglePassword.getAttribute("toggle")
+      );
       if (input) input.type = input.type === "password" ? "text" : "password";
     });
   }
 
-  // Function to show alerts
   const showAlert = (message, type = "danger") => {
     if (!alertContainer) return;
     alertContainer.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    `;
+    <div class="alert alert-${type} alert-dismissible fade show mt-2" role="alert">
+      ${message}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  `;
   };
 
-  // Function to animate button with shimmer loader
   const setButtonLoading = (button, loading = true) => {
     if (loading) {
       button.disabled = true;
@@ -32,22 +33,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="shimmer-loader"></span>
         Logging in...
       `;
-      button.style.position = "relative";
-      button.style.overflow = "hidden";
     } else {
       button.disabled = false;
       button.innerHTML = "Login";
     }
   };
 
-  // Form submit handler
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    showAlert(""); // clear any previous alerts
+    alertContainer.innerHTML = "";
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
     const button = form.querySelector("button");
     setButtonLoading(button, true);
 
@@ -58,18 +55,22 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok && data.success) {
         showAlert("Login successful! Redirecting...", "success");
         document.cookie = `access_token=${data.access_token}; path=/`;
-        setTimeout(() => window.location.href = "/", 1000);
+        setTimeout(() => (window.location.href = "/"), 1000);
       } else {
-        showAlert(`Login failed: ${data.detail || "Unknown error"}`, "danger");
+        const msg =
+          data.detail ||
+          data.message ||
+          "Invalid credentials or user not found.";
+        showAlert(`${msg}`, "danger");
       }
     } catch (err) {
       console.error(err);
-      showAlert("An error occurred. Please try again.", "danger");
+      showAlert("⚠️ Server connection error. Please try again.", "danger");
     } finally {
       setButtonLoading(button, false);
     }
