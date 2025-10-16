@@ -7,13 +7,12 @@
         <div class="topbar-divider d-none d-sm-block"></div>
 
         <li class="nav-item dropdown no-arrow">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="modal"
+                data-target="#logoutModal">
                 <img class="img-profile rounded-circle" src="{{ url_for('static', path='img/boy.png') }}"
                     style="max-width: 60px">
                 <!-- Add data attributes to trigger modal -->
-                <span class="ml-2 d-none d-lg-inline text-white small"
-                      data-toggle="modal" data-target="#logoutModal"
-                      style="cursor:pointer;">
+                <span class="ml-2 d-none d-lg-inline text-white small" style="cursor:pointer;">
                     {{ user_name if user_name else 'Guest' }}
                 </span>
             </a>

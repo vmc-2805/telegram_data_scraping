@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
@@ -6,19 +6,15 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from database import get_db
 from models.admin import Admin
-import os
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 from models.product import Product
 from sqlalchemy import asc, desc, or_, func
-from PIL import Image
-import imagehash
 from models.SameProduct import SameProduct
 from models.UniqueProduct import UniqueProduct
 from models.ZeroPrice import ZeroPrice
 from models.LowPrice import LowPrice
-
-
+import os
 
 load_dotenv()
 
@@ -222,7 +218,7 @@ class UserLogin:
                 "product_price": float(p.product_price) if p.product_price else 0.0,
                 "channel_name": p.channel_name,
                 "source_type": p.source_type,
-                "date": str(p.created_at) if p.created_at else "N/A",
+                "date": p.created_at.strftime("%Y-%m-%d") if p.created_at else "",
                 "media_url": p.media_url,
             }
             for p in paged_products
