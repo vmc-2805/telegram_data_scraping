@@ -26,11 +26,13 @@ def find_and_store_same_products():
     duplicate_names = [
         name[0]
         for name in db.query(Product.product_name)
-                      .group_by(Product.product_name)
-                      .having(func.count(Product.product_name) > 1)
-                      .all()
+        .group_by(Product.product_name)
+        .having(func.count(Product.product_name) > 1)
+        .all()
     ]
-    same_name_products = db.query(Product).filter(Product.product_name.in_(duplicate_names)).all()
+    same_name_products = (
+        db.query(Product).filter(Product.product_name.in_(duplicate_names)).all()
+    )
     print(f"Found {len(same_name_products)} products with duplicate names")
 
     products_with_images = db.query(Product).filter(Product.media_url.isnot(None)).all()
@@ -57,10 +59,14 @@ def find_and_store_same_products():
             print(f"Error processing image {image_path}: {e}")
             continue
 
-    same_image_products = db.query(Product).filter(Product.id.in_(duplicate_image_ids)).all()
+    same_image_products = (
+        db.query(Product).filter(Product.id.in_(duplicate_image_ids)).all()
+    )
     print(f"Found {len(same_image_products)} products with duplicate images")
 
-    all_same_products = {p.id: p for p in same_name_products + same_image_products}.values()
+    all_same_products = {
+        p.id: p for p in same_name_products + same_image_products
+    }.values()
     print(f"Total duplicates to store: {len(all_same_products)}")
 
     db.query(SameProduct).delete()
@@ -163,8 +169,11 @@ def find_and_store_unique_products():
 
     db.commit()
     db.close()
-    print("✅ Unique (non-duplicate) products stored in unique_products table successfully.")
+    print(
+        "✅ Unique (non-duplicate) products stored in unique_products table successfully."
+    )
+
 
 if __name__ == "__main__":
-    # find_and_store_same_products()
+    find_and_store_same_products()
     find_and_store_unique_products()

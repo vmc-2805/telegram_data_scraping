@@ -14,6 +14,8 @@ from mysql.connector import Error
 
 load_dotenv()
 
+BACKFILL_DAYS = int(os.getenv("BACKFILL_DAYS"))
+
 API_ID = int(os.getenv("TELEGRAM_API_ID"))
 API_HASH = os.getenv("TELEGRAM_API_HASH")
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
@@ -87,6 +89,7 @@ class DatabaseHandler:
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
+
 
         try:
             with self.connection.cursor() as cursor:
@@ -388,7 +391,7 @@ def channel_username_from_url(url: str) -> str:
 
 
 async def scrape_past_week(
-    tg_client: TelegramClient, db: DatabaseHandler, days: int = 7
+    tg_client: TelegramClient, db: DatabaseHandler, days=BACKFILL_DAYS
 ) -> None:
     since_date = datetime.now(timezone.utc) - timedelta(days=days)
     os.makedirs("downloads", exist_ok=True)
@@ -493,9 +496,9 @@ async def scrape_channels() -> None:
         except Exception as e:
             print(f"⚠️ Could not join or already joined channel {username}: {e}")
 
-    print("\n⏳ Fetching messages from the past 7 days...\n")
-    await scrape_past_week(tg_client, db, days=7)
-    print("\n✅ Completed past week data backfill.\n")
+    print(f"\n⏳ Fetching messages from the past {BACKFILL_DAYS} days...\n")
+    await scrape_past_week(tg_client, db, days=BACKFILL_DAYS)
+    print(f"\n✅ Completed past {BACKFILL_DAYS}-day data backfill.\n")
 
     register_realtime_handlers(tg_client, db)
     print("▶️ Real-time monitoring started for channels:", usernames)
